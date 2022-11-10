@@ -4,6 +4,7 @@ from dash.dependencies import Input, Output
 import app as app
 from pages import help, home
 
+application = app
 
 app.layout = html.Div([
         dcc.Location(id = 'url', refresh = False),

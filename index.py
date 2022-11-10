@@ -1,7 +1,7 @@
 from dash import html, dcc
 from dash.dependencies import Input, Output
 
-import MyDashApp.src.app as app
+import app as app
 from pages import help, home
 
 

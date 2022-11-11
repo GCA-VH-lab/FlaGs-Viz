@@ -13,8 +13,9 @@ app = dash.Dash(__name__,
                 suppress_callback_exceptions = True,
                 use_pages = True)
 
-app.title = ('./assets/favicon.ico')
 server = app.server
+app.title = ('./assets/favicon.ico')
+
 
 
 app.layout = html.Div(children=[
@@ -23,5 +24,5 @@ app.layout = html.Div(children=[
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
-    #app.run_server(host = '127.0.0.1', port = '8050',debug=True)
+    #app.run_server(debug=True)
+    app.run_server(host = '127.0.0.1', port = '8050',debug=True)

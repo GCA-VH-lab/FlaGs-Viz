@@ -8,11 +8,12 @@ navbar = dbc.Navbar(
     dbc.Container([
         dbc.Row([
             dbc.Col(
-                dbc.NavbarBrand('FlaGs Visualisation', className="ms-2")),
+                dbc.NavbarBrand('FlaGs Visualisation', className = 'ms-2')),
             dbc.Col(
                 dbc.Nav([
-                    dbc.NavItem(dbc.NavLink("Home", href = "/")),
-                    dbc.NavItem(dbc.NavLink("Help", href = "/help"))
+                    dbc.NavItem(dbc.NavLink('Home', href = '/')),
+                    dbc.NavItem(dbc.NavLink('VizOne', href = '/vizone')),
+                    dbc.NavItem(dbc.NavLink('Help', href = '/help'))
                 ], navbar = True),
             width = {'size': 'auto'})],
         align = 'center', 

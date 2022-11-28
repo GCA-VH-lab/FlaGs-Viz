@@ -436,15 +436,19 @@ def get_tree_plot(tree):
         return branch_line 
 
 
-    def draw_clade(clade, x_start,  line_shapes,line_color='rgb(15,15,15)', line_width=1):
+    def draw_clade(clade, x_start, line_shapes,line_color='rgb(15,15,15)', line_width=1):
         """Recursively draw the tree branches, down from the given clade"""
         
         x_curr = x_coords[clade]
         y_curr = y_coords[clade]
     
         # Draw a horizontal line from start to here
-        branch_line=get_clade_lines(orientation='horizontal', y_curr=y_curr, x_start=x_start, x_curr=x_curr,  
-                                    line_color=line_color, line_width=line_width)
+        branch_line=get_clade_lines(orientation = 'horizontal', 
+                                    y_curr = y_curr, 
+                                    x_start = x_start, 
+                                    x_curr = x_curr,  
+                                    line_color = line_color, 
+                                    line_width = line_width)
     
         line_shapes.append(branch_line)
     
@@ -453,8 +457,12 @@ def get_tree_plot(tree):
             y_top = y_coords[clade.clades[0]]
             y_bot = y_coords[clade.clades[-1]]
         
-            line_shapes.append(get_clade_lines(orientation='vertical', x_curr=x_curr, y_bot=y_bot, y_top=y_top,
-                                            line_color=line_color, line_width=line_width))
+            line_shapes.append(get_clade_lines(orientation = 'vertical', 
+                                            x_curr = x_curr, 
+                                            y_bot = y_bot, 
+                                            y_top = y_top,
+                                            line_color = line_color, 
+                                            line_width = line_width))
         
             # Draw descendants
             for child in clade:
@@ -530,74 +538,141 @@ def get_tree_plot(tree):
 
 # ----------------------------- LAYOUT ---------------------------------
 
-
 layout = html.Div([
             navigation.navbar,
             dbc.Row([
                 dbc.Row([
                     html.H3('Upload Files'),
-                    html.P('Please upload files below for visualisation.'),
-                    dbc.Col([
-                        dbc.Card([
-                            dbc.CardHeader('''Choose phylogenetic tree file 
-                            (ladderTree.nw)'''),
-                            dbc.CardBody([
-                                dcc.Upload(
-                                    id = 'upload-phylo-file',
-                                    children = html.Div([
-                                        'Drag and Drop or ',
-                                        html.A('Select File')]),
-                                    multiple = True,
-                                    style={
-                                        'width': '100%',
-                                        'height': '50px',
-                                        'lineHeight': '60px',
-                                        'borderWidth': '1px',
-                                        'borderStyle': 'dashed',
-                                        'borderRadius': '5px',
-                                        'textAlign': 'center',
-                                        'margin-bottom': '10px',
-                                        'margin-top' : '10px'
-                                    }),
-                            ]), 
-                        ], 
-                        inverse = False),
-                        html.Div([
-                            dbc.Alert(
-                                "Unsuccessful Upload. Please make sure to upload .nw file.",
-                                id = 'alert-phylo',
-                                color = "warning",
-                                dismissable = True,
-                                is_open = False,
-                            )
+                    html.Hr(),
+                    dbc.Row([
+                        dbc.Row([
+                            html.Div([
+                                dbc.Button(
+                                    'Upload Your Submission',
+                                    id = 'button-web',
+                                    className='mb-3',
+                                    color = 'primary',
+                                    n_clicks = 0),
+                                dbc.Collapse(
+                                    html.Div([
+                                        dbc.Row([
+                                            html.H5('''Insert your submission 
+                                                    ID''')
+                                        ],  style={
+                                                'margin-left' : '40px',
+                                                'margin-top' : '5px',
+                                                'margin-bottom' : '10px',
+                                                'width': '100%', 
+                                                }),
+                                        dbc.Row([
+                                            dbc.Col([
+                                                dcc.Input(
+                                                    id = 'submission-search',
+                                                    placeholder = 'Submission ID',
+                                                    style = {
+                                                        'width': '100%',
+                                                        'height': '40px',
+                                                        'lineHeight': '60px',
+                                                        'borderWidth': '1px',
+                                                        'borderRadius': '5px',
+                                                        'textAlign': 'center',
+                                                        'margin-bottom': '10px',
+                                                        'margin-left' : '50px'}
+                                                ), 
+                                            ]),
+                                            dbc.Col([
+                                                dbc.Button(
+                                                    'Show me',
+                                                    id = 'upload-submission',
+                                                    className='mb-3',
+                                                    color = 'primary',
+                                                    n_clicks = 0)
+                                                ])
+                                        ], style={
+                                                'margin-left' : '40px',
+                                                'margin-top' : '5px',
+                                                'margin-bottom' : '10px',
+                                                'width': '50%'})
+                                    ]),
+                                    id = 'collapse-web',
+                                    is_open = False
+                                )
+                            ])
                         ]),
-                    ], width = 4),
-                    dbc.Col(width = 1),
-                    dbc.Col([
-                        dbc.Card([
-                            dbc.CardHeader('Choose operon file (.tsv)'),
-                            dbc.CardBody([
-                                dcc.Upload(
-                                    id = 'upload-operon-file',
-                                    children = html.Div([
-                                        'Drag and Drop or ',
-                                        html.A('Select File')]),
-                                    multiple = True,
-                                    style={
-                                        'width': '100%',
-                                        'height': '50px',
-                                        'lineHeight': '60px',
-                                        'borderWidth': '1px',
-                                        'borderStyle': 'dashed',
-                                        'borderRadius': '5px',
-                                        'textAlign': 'center',
-                                        'margin-bottom': '10px',
-                                        'margin-top' : '10px'
-                                    })
-                            ]), 
-                        ], 
-                        inverse = False),
-                    ], width = 7),
+                        html.Br(),
+                        dbc.Row([
+                            html.Div([
+                                dbc.Button(
+                                    'Upload Your Local Files',
+                                    id = 'button-local',
+                                    className='mb-3',
+                                    color = 'primary',
+                                    n_clicks = 0),
+                                dbc.Collapse(
+                                    html.Div([
+                                        dbc.Row([
+                                            html.H5('''Browse files on your 
+                                            local machine''')
+                                        ],  style={
+                                                'margin-left' : '40px',
+                                                'margin-top' : '5px',
+                                                'margin-bottom' : '10px',
+                                                'width': '80%', 
+                                                }),
+                                        dbc.Row([
+                                            dbc.Col([
+                                                html.H6('''Choose phylogenetic 
+                                                tree file (ladderTree.nw)'''),
+                                                dcc.Upload(
+                                                    id = 'upload-phylo-file',
+                                                    children = html.Div([
+                                                        'Drag and Drop or ',
+                                                        html.A('Select File')]),
+                                                    multiple = True,
+                                                    style={
+                                                        'width': '100%',
+                                                        'height': '50px',
+                                                        'lineHeight': '60px',
+                                                        'borderWidth': '1px',
+                                                        'borderStyle': 'dashed',
+                                                        'borderRadius': '5px',
+                                                        'textAlign': 'center',
+                                                        'margin-bottom': '10px',
+                                                        'margin-top' : '10px'
+                                                    }),
+                                            ]),
+                                            dbc.Col([
+                                                html.H6('''Choose operon.tsv'''),
+                                                dcc.Upload(
+                                                    id = 'upload-operon-file',
+                                                    children = html.Div([
+                                                        'Drag and Drop or ',
+                                                        html.A('Select File')]),
+                                                    multiple = True,
+                                                    style={
+                                                        'width': '100%',
+                                                        'height': '50px',
+                                                        'lineHeight': '60px',
+                                                        'borderWidth': '1px',
+                                                        'borderStyle': 'dashed',
+                                                        'borderRadius': '5px',
+                                                        'textAlign': 'center',
+                                                        'margin-bottom': '10px',
+                                                        'margin-top' : '10px'
+                                                    })
+                                            ])
+                                            ], style={
+                                                    'margin-left' : '40px',
+                                                    'margin-top' : '5px',
+                                                    'margin-bottom' : '10px',
+                                                    'width': '80%'})
+                                    ]),
+                                    id = 'collapse-local',
+                                    is_open = False
+                                )
+                            ])
+                        ])
+                    ]),
                 ], style={
                     'margin-left' : '40px',
                     'margin-top' : '60px',
@@ -629,6 +704,30 @@ layout = html.Div([
 
 # ----------------------------- CALLBACKS ------------------------------
 
+
+# Upload buttons
+@callback(
+    Output("collapse-web", "is_open"),
+    [Input("button-web", "n_clicks")],
+    [State("collapse-web", "is_open")],
+)
+def toggle_collapse(n, is_open):
+    if n:
+        return not is_open
+    return is_open
+
+@callback(
+    Output("collapse-local", "is_open"),
+    [Input("button-local", "n_clicks")],
+    [State("collapse-local", "is_open")],
+)
+def toggle_collapse(n, is_open):
+    if n:
+        return not is_open
+    return is_open
+
+
+# Uploading files
 @callback(
     Output('operon-graph', 'children'),
     Input('upload-operon-file', 'contents'),

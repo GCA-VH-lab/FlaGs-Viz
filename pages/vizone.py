@@ -42,8 +42,37 @@ layout = html.Div([
             navigation.navbar,
             dbc.Row([
                 dbc.Row([
-                    html.H3('Search for your gene'),
-                    html.P('Please upload files below for visualisation.'),
+                    html.H3('Single Gene Search'),
+                    html.Hr(),
+                    dbc.Row([
+                        dbc.Col([
+                            dcc.Input(
+                                id = 'submission-search',
+                                placeholder = 'Accession ID',
+                                style = {
+                                    'width': '100%',
+                                    'height': '40px',
+                                    'lineHeight': '60px',
+                                    'borderWidth': '1px',
+                                    'borderRadius': '5px',
+                                    'textAlign': 'center',
+                                    'margin-bottom': '10px',
+                                    'margin-left' : '50px'}
+                            ), 
+                        ]),
+                        dbc.Col([
+                            dbc.Button(
+                                'Show me',
+                                id = 'gene-accession',
+                                className='mb-3',
+                                color = 'primary',
+                                n_clicks = 0)
+                            ])
+                    ], style={
+                            'margin-left' : '40px',
+                            'margin-top' : '5px',
+                            'margin-bottom' : '10px',
+                            'width': '50%'})
                 ], style={
                     'margin-left' : '40px',
                     'margin-top' : '60px',

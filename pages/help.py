@@ -11,11 +11,11 @@ dash.register_page(__name__, path = '/help')
 
 font_style = 'Helvetica'
 
-trees_png = './assets/ladderTree.nw.png'
-trees_base64 = base64.b64encode(open(trees_png, 'rb').read()).decode('ascii')
+faq_trees = './assets/faq_phylos.png'
+trees_base64 = base64.b64encode(open(faq_trees, 'rb').read()).decode('ascii')
 
-loading_png = './assets/Loading.png'
-loading_base64 = base64.b64encode(open(loading_png, 'rb').read()).decode('ascii')
+faq_loading = './assets/faq_loading.png'
+loading_base64 = base64.b64encode(open(faq_loading, 'rb').read()).decode('ascii')
 
 
 layout = html.Div([

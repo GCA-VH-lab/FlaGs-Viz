@@ -15,7 +15,7 @@ import random
 import re
 import dash
 import math
-import dash_cytoscape
+#import dash_cytoscape
 import dash_bio as dashbio
 from dash import html, dcc, callback
 from dash.dependencies import Input, Output, State
@@ -683,9 +683,9 @@ layout = html.Div([
             dbc.Row([
                 dbc.Col([
                     dbc.Row([
-                        dbc.Col([
-                            html.Div(id = 'cytoscape-phylo'),
-                        ], width = 4),
+                        #dbc.Col([
+                        #    html.Div(id = 'cytoscape-phylo'),
+                        #], width = 4),
                         dbc.Col(width = 1),
                         dbc.Col([
                             html.Div(id = 'operon-graph'),
@@ -705,7 +705,8 @@ layout = html.Div([
 # ----------------------------- CALLBACKS ------------------------------
 
 
-# Upload buttons
+# --------- Buttons
+# Collapsing upload fields button
 @callback(
     Output("collapse-web", "is_open"),
     [Input("button-web", "n_clicks")],
@@ -725,6 +726,20 @@ def toggle_collapse(n, is_open):
     if n:
         return not is_open
     return is_open
+
+
+# Submitting search   
+@callback(
+    Output('container-button-basic', 'children'),
+    Input('submit-val', 'n_clicks'),
+    State('input-on-submit', 'value')
+)
+def update_output(n_clicks, value):
+    return 'The input value was "{}" and the button has been clicked {} times'.format(
+        value,
+        n_clicks
+    )
+
 
 
 # Uploading files

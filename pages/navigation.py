@@ -7,11 +7,12 @@ import dash_bootstrap_components as dbc
 navbar = dbc.Navbar(
     dbc.Container([
         dbc.Row([
-            dbc.Col(
-                dbc.NavbarBrand('FlaGs Visualisation', className = 'ms-2')),
+            dbc.Col([
+                #dbc.NavItem(dbc.NavLink('Home', href = '/')),
+                dbc.NavbarBrand('FlaGs Visualisation', className = 'ms-2', href = '/')
+            ]),
             dbc.Col(
                 dbc.Nav([
-                    dbc.NavItem(dbc.NavLink('Home', href = '/')),
                     dbc.NavItem(dbc.NavLink('VizOne', href = '/vizone')),
                     dbc.NavItem(dbc.NavLink('Help', href = '/help'))
                 ], navbar = True),

@@ -21,4 +21,9 @@ def display_page(pathname):
 
 
 if __name__ == '__main__':
-    app.run_server(debug = True)
+    # hostname = socket.gethostname()
+    # ip_address = socket.gethostbyname(hostname)
+    # app.run_server(host=ip_address, port=5002, debug=True)
+    app.run_server(host='0.0.0.0', port=8080, debug=True)
+    
+    # app.run_server(debug = True)

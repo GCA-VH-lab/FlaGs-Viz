@@ -73,9 +73,11 @@ colorDict={}
 
 # --------------------------- ANALYSING DATA ---------------------------
 
-
 # Operon plot
- 
+
+df = pd.read_csv("http://130.235.240.53/scripts/writable/veda.bojar@med.lu.se%2322122110935/")
+
+# Operon plot 
 def generate_plot(contents, filename, date):
     content_type, content_string = contents.split(',')    
     
@@ -178,7 +180,7 @@ def generate_operon(operon_file):
         length = operon_df['gene_length'][i]
         direction = operon_df['gene_direction'][i]
         group_number = operon_df['hmlgs_group'][i]
-        y_level = (operon_df['y_level'][i] * 10) * -1
+        y_level = (operon_df['y_level'][i] * 5) * -1
 
         if length < 100:
             start = start-50
@@ -210,7 +212,7 @@ def generate_operon(operon_file):
                 colorDict[group_number] = random_color()
 
         arrow_head = 120
-        arrow_width = 2
+        arrow_width = 1.2
 
         if start == 1 or group_number == 0:
             hover_text = (f'Accession: {id_g}<br>'
@@ -328,8 +330,9 @@ def get_operon_graph_dimensions(operon_file):
 
     return y_vh
 
-# Phylo Tree
 
+
+# Phylo Tree
 def generate_phylo_plot(contents, filename, date):
     content_type, content_string = contents.split(',')    
     
@@ -389,7 +392,7 @@ def get_tree_plot(tree):
             xcoords = tree.depths(unit_branch_lengths=True)
         return xcoords
 
-    def get_y_coords(tree, dist = 10):
+    def get_y_coords(tree, dist = 6):
         maxheight = tree.count_terminals()
         ycoords = dict((taxon, i * dist) 
                     for i, taxon in enumerate((tree.get_terminals())))
@@ -683,9 +686,9 @@ layout = html.Div([
             dbc.Row([
                 dbc.Col([
                     dbc.Row([
-                        #dbc.Col([
-                        #    html.Div(id = 'cytoscape-phylo'),
-                        #], width = 4),
+                        dbc.Col([
+                           html.Div(id = 'cytoscape-phylo'),
+                        ], width = 4),
                         dbc.Col(width = 1),
                         dbc.Col([
                             html.Div(id = 'operon-graph'),
@@ -739,6 +742,10 @@ def update_output(n_clicks, value):
         value,
         n_clicks
     )
+
+
+
+
 
 
 

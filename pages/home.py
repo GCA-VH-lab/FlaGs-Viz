@@ -71,6 +71,16 @@ color={}
 colorDict={}
 
 
+
+# ---------------------------- SERVER DATA -----------------------------
+
+storred_runs = 'http://130.235.240.53/scripts/writable/?C=M;O=D'
+server_table = pd.read_html(storred_runs, header=0)
+server_df = server_table[0]
+submissions = server_df.loc[:, 'Name':'Last modified'].dropna()
+submitters = server_df.loc[:, 'Name'].dropna()
+
+
 # --------------------------- ANALYSING DATA ---------------------------
 
 # Operon plot
@@ -559,8 +569,8 @@ layout = html.Div([
                                 dbc.Collapse(
                                     html.Div([
                                         dbc.Row([
-                                            html.H5('''Insert your submission 
-                                                    ID''')
+                                            html.H5('''Insert your e-mail 
+                                            address''')
                                         ],  style={
                                                 'margin-left' : '40px',
                                                 'margin-top' : '5px',
@@ -570,8 +580,9 @@ layout = html.Div([
                                         dbc.Row([
                                             dbc.Col([
                                                 dcc.Input(
-                                                    id = 'submission-search',
-                                                    placeholder = 'Submission ID',
+                                                    id = 'insert-email',
+                                                    placeholder = '''example@
+                                                    mail.com''',
                                                     style = {
                                                         'width': '100%',
                                                         'height': '40px',
@@ -590,7 +601,10 @@ layout = html.Div([
                                                     className='mb-3',
                                                     color = 'primary',
                                                     n_clicks = 0)
-                                                ])
+                                                ]),
+                                            dbc.Col([
+                                                html.Div(id = 'runs')
+                                            ]),
                                         ], style={
                                                 'margin-left' : '40px',
                                                 'margin-top' : '5px',
@@ -733,19 +747,46 @@ def toggle_collapse(n, is_open):
 
 # Submitting search   
 @callback(
-    Output('container-button-basic', 'children'),
-    Input('submit-val', 'n_clicks'),
-    State('input-on-submit', 'value')
+    Output('runs', 'children'),
+    [  
+        Input('insert-email', 'value'),
+        Input('upload-submission', 'n_clicks')
+    ]
 )
-def update_output(n_clicks, value):
-    return 'The input value was "{}" and the button has been clicked {} times'.format(
-        value,
-        n_clicks
-    )
+def find_submission(value, n_clicks):
+    email_list = []
+    codes_list = []
+    runs_list = []
+    for s in submitters.iloc[1:]:
+        if '@' in s:
+            email_list.append(s.split('#')[0])
+            #codes_list(s.split('#')[1])
+    try: 
+        if value != '':
+            if value not in email_list:
+                print('E-mail address cannot be found')
+            for s in submissions.loc[1:, 'Name':'Last modified']['Name']:
+                if s.startswith(value):
+                    run = submissions[submissions['Name']==s]['Last modified']
+                    runs_list.append(run)
+                    print(run)
+        else:
+            print('E-mail address cannot be found')        
+    except:
+        print('Incorrect email or code')
 
-
-
-
+    return html([
+            dbc.Col([
+                dcc.Dropdown(
+                    id = 'submissions',
+                    options = runs_list,
+                    value = '''Please select a 
+                    submission to view''',
+                    #color = '#99B2B8',
+                    style = {'width': '80%', 
+                    'display': 'inline-block'})
+            ])
+        ])
 
 
 

@@ -38,6 +38,8 @@ import datetime
 
 from pages import navigation
 
+import validators
+
 # --------------------------- CREATE PAGE ------------------------------
 
 dash.register_page(__name__, path = '/')
@@ -74,18 +76,13 @@ colorDict={}
 
 # ---------------------------- SERVER DATA -----------------------------
 
-storred_runs = 'http://130.235.240.53/scripts/writable/?C=M;O=D'
+storred_runs = 'http://130.235.240.53/scripts/writable/queueDir/'
 server_table = pd.read_html(storred_runs, header=0)
 server_df = server_table[0]
-submissions = server_df.loc[:, 'Name':'Last modified'].dropna()
-submitters = server_df.loc[:, 'Name'].dropna()
-
+all_submissions = server_df.loc[:, 'Name':'Last modified'].dropna()
+all_submitters = server_df.loc[:, 'Name'].dropna()
 
 # --------------------------- ANALYSING DATA ---------------------------
-
-# Operon plot
-
-df = pd.read_csv("http://130.235.240.53/scripts/writable/veda.bojar@med.lu.se%2322122110935/")
 
 # Operon plot 
 def generate_plot(contents, filename, date):
@@ -757,25 +754,47 @@ def find_submission(value, n_clicks):
     email_list = []
     codes_list = []
     runs_list = []
-    for s in submitters.iloc[1:]:
+    finished_submissions = []
+    for s in submitters.iloc[1:, 'Name']:
         if '@' in s:
             email_list.append(s.split('#')[0])
-            #codes_list(s.split('#')[1])
     try: 
         if value != '':
+            for s in submissions.loc[1:, 'Name':'Last modified']['Name']:
+                if s.startswith(value):
+                    email = value.split('#')[0]
+                    email_name = value.split("@")[0]
+                    code_a = re.search('#(.*).run', s)
+                    code_b = code_a.group(1)
+                    code = '23' + str(code_b)
+                    print(s)
+                    print(name)
+                    print(email_name)
+                    print(code)
+                    link_operon = f'http://130.235.240.53/scripts/writable/{email}%{code}/{email_name}_flagsOut_TreeOrder_operon.tsv'
+                    if validators.url(link_operon) == True:
+                        exits.appned(code)
+                    else:
+                        print('Run does not exits yet')
+                    df = pd.read_csv(link_operon)
             if value not in email_list:
                 print('E-mail address cannot be found')
+            for s in submissions.loc[1:, 'Name']['Name']:
+                email = s.split('#')[0]
+                code = s.split('#')[1]
             for s in submissions.loc[1:, 'Name':'Last modified']['Name']:
                 if s.startswith(value):
                     run = submissions[submissions['Name']==s]['Last modified']
                     runs_list.append(run)
                     print(run)
+            # return runs_list
+            # print(runs_list)
         else:
             print('E-mail address cannot be found')        
     except:
         print('Incorrect email or code')
 
-    return html([
+    children = html([
             dbc.Col([
                 dcc.Dropdown(
                     id = 'submissions',
@@ -784,9 +803,10 @@ def find_submission(value, n_clicks):
                     submission to view''',
                     #color = '#99B2B8',
                     style = {'width': '80%', 
-                    'display': 'inline-block'})
+                        'display': 'inline-block'})
             ])
         ])
+    return children
 
 
 

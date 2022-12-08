@@ -38,7 +38,7 @@ import datetime
 
 from pages import navigation
 
-import validators
+import requests
 
 # --------------------------- CREATE PAGE ------------------------------
 
@@ -79,8 +79,8 @@ colorDict={}
 storred_runs = 'http://130.235.240.53/scripts/writable/queueDir/'
 server_table = pd.read_html(storred_runs, header=0)
 server_df = server_table[0]
-all_submissions = server_df.loc[:, 'Name':'Last modified'].dropna()
-all_submitters = server_df.loc[:, 'Name'].dropna()
+submissions = server_df.loc[:, 'Name':'Last modified'].dropna()
+submitters = server_df.loc[:, 'Name'].dropna()
 
 # --------------------------- ANALYSING DATA ---------------------------
 

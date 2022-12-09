@@ -15,7 +15,7 @@ import random
 import re
 import dash
 import math
-#import dash_cytoscape
+import dash_cytoscape
 import dash_bio as dashbio
 from dash import html, dcc, callback
 from dash.dependencies import Input, Output, State
@@ -77,10 +77,73 @@ colorDict={}
 # ---------------------------- SERVER DATA -----------------------------
 
 storred_runs = 'http://130.235.240.53/scripts/writable/queueDir/'
-server_table = pd.read_html(storred_runs, header=0)
+
+def operon(email):
+    link_operon = f'http://130.235.240.53/scripts/writable/{email_search(email)[0]}%23{email_search(email)[2]}/{selected_submission(option)}_flagsOut_TreeOrder_operon.tsv'
+    return link_operon
+
+
+def phylo(email):
+    email_search(email)
+    link_phylo_ladder = f'http://130.235.240.53/scripts/writable/{email_search(email)[0]}%23{email_search(email)[2]}/{selected_submission(option)}_flagsOut_ladderTree.nw'
+    return link_phylo_ladder
+
+
+# Returning databases from server links
+server_table = pd.read_html(storred_runs)
+#print(server_table)
 server_df = server_table[0]
 submissions = server_df.loc[:, 'Name':'Last modified'].dropna()
 submitters = server_df.loc[:, 'Name'].dropna()
+
+# Lists
+email_list = []
+codes_list = []
+finished_runs = []
+runs = []
+
+
+def email_search(email):
+    # Validates that the user's email is found in the queueDir and 
+    # fetches the user email, email_name, and the FlaGs submission_id
+    for s in submissions.loc[1:, 'Name':'Last modified']['Name']:
+        if s.startswith(email):
+            email = email.split('#')[0]
+            email_name = email.split('@')[0]
+            code = re.search('#(.*).run', s)
+            submission_id = code.group(1)
+    return email, email_name, submission_id
+
+
+def run_finished(url):
+    # Validates the existance of an URL link
+    response = requests.head(url)
+    return response.status_code in range(200, 400)
+
+
+def finished_submissions(run):
+    # For the user's email, append the date ('Last modified') of all 
+    # server stored runs to runs. This list is later used as the options 
+    # in the dropdown menu.  
+    for s in submissions.loc[1:, 'Name':'Last modified']['Name']: 
+        if s.startswith(email):   
+            run = str(submissions[submissions['Name']==s]['Last modified'])
+            run_date = re.search(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}', run)
+            submission_id = run_date.group(0)
+            print(submission_id)
+            finished_runs.append(submission_id)
+    return finished_runs
+
+
+def selected_submission(option):
+    # Once the user selects one of their runs from the dropdown menu, 
+    # files for generating graphs are retrived from the server.
+    sub = str(submissions[submissions['Last modified']==option]['Name'])
+    code = re.search('#(.*).run', sub)
+    submission_id = code.group(1)
+    return submission_id
+
+
 
 # --------------------------- ANALYSING DATA ---------------------------
 
@@ -101,26 +164,32 @@ def generate_plot(contents, filename, date):
     return html.Div([
                     html.H6('Currently viewing file: ' + filename),
                     html.Hr(),
-                        dcc.Graph(
-                            id = 'operon-plot',
-                            animate = False,
-                            responsive = True,
-                            figure = generate_operon(operon_file),
-                            style = {
-                                'display': 'block',
-                                'margin-left': '0px', 
-                                'margin-top': '10px',
-                                'margin-bottom': '10px',
-                                'height': get_operon_graph_dimensions(operon_file)
-                            },
-                            config = {
-                                    'displaylogo': False,
-                                    'toImageButtonOptions': {
-                                            'format': 'svg',
-                                            'filename': filename,
-                                            'scale': 1}
-                                    }
-                        )
+                    dcc.Graph(
+                        id = 'operon-plot',
+                        animate = False,
+                        responsive = True,
+                        figure = generate_operon(operon_file),
+                        style = {
+                            'display': 'block',
+                            'margin-left': '0px', 
+                            'margin-top': '10px',
+                            'margin-bottom': '10px',
+                            'height': get_operon_graph_dimensions(operon_file)
+                        },
+                        config = {
+                                'displaylogo': False,
+                                'toImageButtonOptions': {
+                                        'format': 'svg',
+                                        'filename': filename,
+                                        'scale': 1}
+                                }
+                    ),
+                    dcc.Slider(
+                        id = 'operon_slider',
+                        min = -1000,
+                        max = 1000,
+                        value = 10,
+                    )   
                 ], style={
                     'margin-left' : '0px', 
                     'margin-top' : '50px',
@@ -421,7 +490,8 @@ def get_tree_plot(tree):
     y_coords = get_y_coords(tree)
 
 
-    def get_clade_lines(orientation='horizontal', y_curr=0, x_start=0, x_curr=0, y_bot=0, y_top=0,
+    def get_clade_lines(orientation='horizontal', 
+                        y_curr=0, x_start=0, x_curr=0, y_bot=0, y_top=0,
                         line_color='rgb(25,25,25)', line_width=0.5):
         """define a shape of type 'line', for branch
         """
@@ -742,6 +812,22 @@ def toggle_collapse(n, is_open):
     return is_open
 
 
+
+def submission_list(email):
+    # For the user's email, append the date ('Last modified') of all 
+    # server stored runs to runs. This list is later used as the options 
+    # in the dropdown menu.  
+    for s in submissions.loc[1:, 'Name':'Last modified']['Name']: 
+        if s.startswith(email):   
+            run = str(submissions[submissions['Name']==s]['Last modified'])
+            run_date = re.search(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}', run)
+            submission_id = run_date.group(0)
+            finished_runs.append(submission_id)
+            finished_runs.sort(reverse=True)
+    return finished_runs
+
+
+
 # Submitting search   
 @callback(
     Output('runs', 'children'),
@@ -751,62 +837,22 @@ def toggle_collapse(n, is_open):
     ]
 )
 def find_submission(value, n_clicks):
-    email_list = []
-    codes_list = []
-    runs_list = []
-    finished_submissions = []
-    for s in submitters.iloc[1:, 'Name']:
-        if '@' in s:
-            email_list.append(s.split('#')[0])
-    try: 
-        if value != '':
-            for s in submissions.loc[1:, 'Name':'Last modified']['Name']:
-                if s.startswith(value):
-                    email = value.split('#')[0]
-                    email_name = value.split("@")[0]
-                    code_a = re.search('#(.*).run', s)
-                    code_b = code_a.group(1)
-                    code = '23' + str(code_b)
-                    print(s)
-                    print(name)
-                    print(email_name)
-                    print(code)
-                    link_operon = f'http://130.235.240.53/scripts/writable/{email}%{code}/{email_name}_flagsOut_TreeOrder_operon.tsv'
-                    if validators.url(link_operon) == True:
-                        exits.appned(code)
-                    else:
-                        print('Run does not exits yet')
-                    df = pd.read_csv(link_operon)
-            if value not in email_list:
-                print('E-mail address cannot be found')
-            for s in submissions.loc[1:, 'Name']['Name']:
-                email = s.split('#')[0]
-                code = s.split('#')[1]
-            for s in submissions.loc[1:, 'Name':'Last modified']['Name']:
-                if s.startswith(value):
-                    run = submissions[submissions['Name']==s]['Last modified']
-                    runs_list.append(run)
-                    print(run)
-            # return runs_list
-            # print(runs_list)
-        else:
-            print('E-mail address cannot be found')        
-    except:
-        print('Incorrect email or code')
-
-    children = html([
-            dbc.Col([
-                dcc.Dropdown(
-                    id = 'submissions',
-                    options = runs_list,
-                    value = '''Please select a 
-                    submission to view''',
-                    #color = '#99B2B8',
-                    style = {'width': '80%', 
-                        'display': 'inline-block'})
-            ])
-        ])
+    if n_clicks:
+        email = value    
+        children = html.Div(
+                    dbc.Col([
+                        dcc.Dropdown(
+                            id = 'submissions',
+                            options = submission_list(email),
+                            placeholder = '''Please select a 
+                            submission to view''',
+                            #color = '#99B2B8',
+                            style = {'width': '100%', 
+                                'display': 'inline-block'})
+                    ])
+                )
     return children
+
 
 
 
@@ -837,3 +883,10 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
         return children
          
 
+# Interacting with operon plot
+@callback(
+    Output('operon-graph', 'figure'),
+    Input('operon-slider', 'value')
+)
+def update_graph(value):
+    return()

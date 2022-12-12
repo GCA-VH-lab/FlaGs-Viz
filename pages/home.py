@@ -22,6 +22,7 @@ from dash.dependencies import Input, Output, State
 
 import dash_daq as daq
 import dash_bootstrap_components as dbc
+from dash.exceptions import PreventUpdate
 
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
@@ -78,8 +79,8 @@ colorDict={}
 
 storred_runs = 'http://130.235.240.53/scripts/writable/queueDir/'
 
-def operon(email):
-    link_operon = f'http://130.235.240.53/scripts/writable/{email_search(email)[0]}%23{email_search(email)[2]}/{selected_submission(option)}_flagsOut_TreeOrder_operon.tsv'
+def operon(s):
+    link_operon = f'http://130.235.240.53/scripts/writable/{submission_components(s)[0]}%23{submission_components(s)[2]}/{submission_components(s)[1]}_flagsOut_TreeOrder_operon.tsv'
     return link_operon
 
 
@@ -636,8 +637,8 @@ layout = html.Div([
                                 dbc.Collapse(
                                     html.Div([
                                         dbc.Row([
-                                            html.H5('''Insert your e-mail 
-                                            address''')
+                                            html.H5('''Insert your 
+                                            e-mail address''')
                                         ],  style={
                                                 'margin-left' : '40px',
                                                 'margin-top' : '5px',
@@ -676,7 +677,7 @@ layout = html.Div([
                                                 'margin-left' : '40px',
                                                 'margin-top' : '5px',
                                                 'margin-bottom' : '10px',
-                                                'width': '50%'})
+                                                'width': '70%'})
                                     ]),
                                     id = 'collapse-web',
                                     is_open = False
@@ -813,47 +814,90 @@ def toggle_collapse(n, is_open):
 
 
 
+def submission_components(submission):
+    # For a run, the key components are split for easier access
+    email = submission.split('#')[0]
+    email_name = submission.split('@')[0]
+    code = re.search('#(.*).run', submission)
+    submission_id = code.group(1)
+    return email, email_name, submission_id
+
+
 def submission_list(email):
-    # For the user's email, append the date ('Last modified') of all 
-    # server stored runs to runs. This list is later used as the options 
-    # in the dropdown menu.  
-    for s in submissions.loc[1:, 'Name':'Last modified']['Name']: 
-        if s.startswith(email):   
-            run = str(submissions[submissions['Name']==s]['Last modified'])
-            run_date = re.search(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}', run)
-            submission_id = run_date.group(0)
-            finished_runs.append(submission_id)
-            finished_runs.sort(reverse=True)
+    # For the inserted email, find all submissions and append those
+    # submissions that are stored on the server to a list. This list is 
+    # later presented as the options of the dropdown menu. 
+    for s in submissions.loc[1:, 'Name':'Last modified']['Name']:
+        if s.startswith(email): 
+            if run_finished(operon(s)) == True:
+                run = str(submissions[submissions['Name']==s]['Last modified'])
+                run_date = re.search(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}', run)
+                submission_id = run_date.group(0)
+                finished_runs.append(submission_id)
+                finished_runs.sort(reverse=True)
     return finished_runs
 
 
 
-# Submitting search   
+# Submitting search
+
 @callback(
     Output('runs', 'children'),
     [  
         Input('insert-email', 'value'),
-        Input('upload-submission', 'n_clicks')
+        Input('upload-submission', 'n_clicks'),
+        Input('runs', 'children')
     ]
 )
-def find_submission(value, n_clicks):
-    if n_clicks:
-        email = value    
+def find_submission(value, n_clicks, children):
+    if value not in submission_list(value):
         children = html.Div(
                     dbc.Col([
-                        dcc.Dropdown(
-                            id = 'submissions',
-                            options = submission_list(email),
-                            placeholder = '''Please select a 
-                            submission to view''',
-                            #color = '#99B2B8',
-                            style = {'width': '100%', 
-                                'display': 'inline-block'})
+                        dbc.Alert('''
+                            The e-mail address did not match any of 
+                            our stored results. Please use the
+                            the same e-mail as when you submitted the
+                            FlaGs results.
+                            ''',
+                            color = 'dark')
                     ])
                 )
+    else:
+        options_list = submission_list(value)
+        if n_clicks:
+            if len(options_list) == 0:
+                children = html.Div(
+                        dbc.Col([
+                            dbc.Alert('''
+                                There are currently no results\n
+                                stored on our server assciated with\n
+                                this e-mail address. Try uploading the\n
+                                results files instead.
+                                ''',
+                                color = 'dark')
+                        ])
+                    )
+            else:
+                children = html.Div(
+                            dbc.Col([
+                                dcc.Dropdown(
+                                    id = 'submissions',
+                                    options = submission_list(value),
+                                    placeholder = '''Please select a 
+                                    submission to view''',
+                                    #color = '#99B2B8',
+                                    style = {'width': '100%', 
+                                        'display': 'inline-block'})
+                            ])
+                        )
     return children
 
-
+# @callback(
+#     Output('submissions', 'value'), 
+#     Input('submissions', 'options')
+# )
+# def callback(value):
+#     return ""
 
 
 # Uploading files

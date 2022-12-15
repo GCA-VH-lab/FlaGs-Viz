@@ -17,7 +17,7 @@ import dash
 import math
 import dash_cytoscape
 import dash_bio as dashbio
-from dash import html, dcc, callback
+from dash import html, dcc, callback, ctx
 from dash.dependencies import Input, Output, State
 
 import dash_daq as daq
@@ -79,15 +79,23 @@ colorDict={}
 
 storred_runs = 'http://130.235.240.53/scripts/writable/queueDir/'
 
-def operon(s):
+def test_url(s):
     link_operon = f'http://130.235.240.53/scripts/writable/{submission_components(s)[0]}%23{submission_components(s)[2]}/{submission_components(s)[1]}_flagsOut_TreeOrder_operon.tsv'
     return link_operon
 
 
-def phylo(email):
-    email_search(email)
-    link_phylo_ladder = f'http://130.235.240.53/scripts/writable/{email_search(email)[0]}%23{email_search(email)[2]}/{selected_submission(option)}_flagsOut_ladderTree.nw'
-    return link_phylo_ladder
+def operon_url(email, email_name, sub_id):
+    link_operon = f'http://130.235.240.53/scripts/writable/{email}%23{sub_id}/{email_name}_flagsOut_TreeOrder_operon.tsv'
+    operon_file = pd.read_csv(link_operon, delimiter = '\t', header = None)
+    return operon_file
+
+def phylo_url(email, email_name, sub_id):
+    link_phylo_ladder = f'http://130.235.240.53/scripts/writable/{email}%23{sub_id}/{email_name}_flagsOut_ladderTree.nw'
+    read_url = pd.read_csv(link_phylo_ladder)
+    print(read_url)
+    print('Hi')
+    phylo_file = Phylo.read(read_url, 'newick')
+    return phylo_file
 
 
 # Returning databases from server links
@@ -102,49 +110,10 @@ email_list = []
 codes_list = []
 finished_runs = []
 runs = []
+email_runs = []
 
-
-def email_search(email):
-    # Validates that the user's email is found in the queueDir and 
-    # fetches the user email, email_name, and the FlaGs submission_id
-    for s in submissions.loc[1:, 'Name':'Last modified']['Name']:
-        if s.startswith(email):
-            email = email.split('#')[0]
-            email_name = email.split('@')[0]
-            code = re.search('#(.*).run', s)
-            submission_id = code.group(1)
-    return email, email_name, submission_id
-
-
-def run_finished(url):
-    # Validates the existance of an URL link
-    response = requests.head(url)
-    return response.status_code in range(200, 400)
-
-
-def finished_submissions(run):
-    # For the user's email, append the date ('Last modified') of all 
-    # server stored runs to runs. This list is later used as the options 
-    # in the dropdown menu.  
-    for s in submissions.loc[1:, 'Name':'Last modified']['Name']: 
-        if s.startswith(email):   
-            run = str(submissions[submissions['Name']==s]['Last modified'])
-            run_date = re.search(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}', run)
-            submission_id = run_date.group(0)
-            print(submission_id)
-            finished_runs.append(submission_id)
-    return finished_runs
-
-
-def selected_submission(option):
-    # Once the user selects one of their runs from the dropdown menu, 
-    # files for generating graphs are retrived from the server.
-    sub = str(submissions[submissions['Last modified']==option]['Name'])
-    code = re.search('#(.*).run', sub)
-    submission_id = code.group(1)
-    return submission_id
-
-
+all_runs_list = []
+stored_runs_list = []
 
 # --------------------------- ANALYSING DATA ---------------------------
 
@@ -814,8 +783,37 @@ def toggle_collapse(n, is_open):
 
 
 
+def email_search(email):
+    # Validates that the user's email is found in the queueDir and 
+    # fetches the user email, email_name, and the FlaGs submission_id
+    for s in submissions.loc[1:, 'Name':'Last modified']['Name']:
+        if s.startswith(email):
+            email = email.split('#')[0]
+            email_name = email.split('@')[0]
+            code = re.search('#(.*).run', s)
+            submission_id = code.group(1)
+    return email, email_name, submission_id
+
+
+def run_finished(url):
+    # Validates the existance of an URL link
+    response = requests.head(url)
+    return response.status_code in range(200, 400)
+
+
+
+def selected_submission(option):
+    # Once the user selects one of their runs from the dropdown menu, 
+    # files for generating graphs are retrived from the server.
+    sub = str(submissions[submissions['Last modified']==option]['Name'])
+    code = re.search('#(.*).run', sub)
+    submission_id = code.group(1)
+    return submission_id
+
+
 def submission_components(submission):
-    # For a run, the key components are split for easier access
+    # For a run, the key components are split for easier access. Used 
+    # for filling out the URL links
     email = submission.split('#')[0]
     email_name = submission.split('@')[0]
     code = re.search('#(.*).run', submission)
@@ -823,95 +821,187 @@ def submission_components(submission):
     return email, email_name, submission_id
 
 
-def submission_list(email):
-    # For the inserted email, find all submissions and append those
-    # submissions that are stored on the server to a list. This list is 
-    # later presented as the options of the dropdown menu. 
+def submission_lists(email):
+    all_runs_list = []
+    stored_runs_list = []
+    # Outputs necessary lists for checking the email agains the runs.
+    # all_runs_list = all runs in queueDir associated with the email
+    # stored_runs_list = only the server stored runs for the email
     for s in submissions.loc[1:, 'Name':'Last modified']['Name']:
-        if s.startswith(email): 
-            if run_finished(operon(s)) == True:
+        # Find all runs associated with the email from the queueDir
+        if s.startswith(email) and s not in all_runs_list:
+            all_runs_list.append(s)
+            # Find all runs that are still accessible (stored) by 
+            # testing the URL for one of the ouput files (operon.tsv)
+            if run_finished(test_url(s)) == True:
                 run = str(submissions[submissions['Name']==s]['Last modified'])
                 run_date = re.search(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}', run)
                 submission_id = run_date.group(0)
-                finished_runs.append(submission_id)
-                finished_runs.sort(reverse=True)
-    return finished_runs
-
+                # Add only unique runs' submission_id to list
+                if submission_id not in stored_runs_list:
+                    stored_runs_list.append(submission_id)
+                stored_runs_list.sort(reverse=True)
+    return all_runs_list, stored_runs_list
 
 
 # Submitting search
-
 @callback(
     Output('runs', 'children'),
     [  
         Input('insert-email', 'value'),
         Input('upload-submission', 'n_clicks'),
-        Input('runs', 'children')
     ]
 )
-def find_submission(value, n_clicks, children):
-    if value not in submission_list(value):
-        children = html.Div(
-                    dbc.Col([
-                        dbc.Alert('''
-                            The e-mail address did not match any of 
-                            our stored results. Please use the
-                            the same e-mail as when you submitted the
-                            FlaGs results.
-                            ''',
-                            color = 'dark')
-                    ])
-                )
-    else:
-        options_list = submission_list(value)
-        if n_clicks:
-            if len(options_list) == 0:
-                children = html.Div(
-                        dbc.Col([
-                            dbc.Alert('''
-                                There are currently no results\n
-                                stored on our server assciated with\n
-                                this e-mail address. Try uploading the\n
-                                results files instead.
-                                ''',
-                                color = 'dark')
-                        ])
-                    )
-            else:
-                children = html.Div(
+def find_submission(value, n_clicks):
+    # Reset n_clicks each time its clicked
+    changed_id = [p['prop_id'] for p in ctx.triggered][0]
+    if 'upload-submission' in changed_id:
+        # Check if proper email address is inserted
+        if '@' not in value:
+            children = html.Div(
                             dbc.Col([
-                                dcc.Dropdown(
-                                    id = 'submissions',
-                                    options = submission_list(value),
-                                    placeholder = '''Please select a 
-                                    submission to view''',
-                                    #color = '#99B2B8',
-                                    style = {'width': '100%', 
-                                        'display': 'inline-block'})
+                                dbc.Alert('''
+                                    The email format is not accepted.
+                                    ''',
+                                    color = 'dark')
                             ])
                         )
-    return children
+            return children
+        else:
+            # Check if email has been used to get FlaGs results
+            all_runs = submission_lists(value)[0]
+            options_list = submission_lists(value)[1]
+            if len(all_runs) == 0:
+                children = html.Div(
+                            dbc.Col([
+                                dbc.Alert('''
+                                    The e-mail address did not match any of 
+                                    our stored results. Please use the
+                                    the same e-mail as for your FlaGs 
+                                    submissions.
+                                    ''',
+                                    color = 'dark')
+                            ])
+                        )
+            else:
+                # Check if there are any server stored runs for email
+                if len(options_list) == 0:
+                    children = html.Div(
+                            dbc.Col([
+                                dbc.Alert('''
+                                    There are currently no results\n
+                                    stored on our server associated with\n
+                                    this e-mail address. Try uploading the\n
+                                    result files instead.
+                                    ''',
+                                    color = 'dark')
+                            ])
+                        )
+                else:
+                    children = html.Div(
+                                dbc.Col([
+                                    dcc.Dropdown(
+                                        id = 'submissions',
+                                        options = options_list,
+                                        placeholder = '''Please select a 
+                                        submission to view''',
+                                        #color = '#99B2B8',
+                                        style = {'width': '100%', 
+                                            'display': 'inline-block'})
+                                ])
+                            )
+            return children
 
-# @callback(
-#     Output('submissions', 'value'), 
-#     Input('submissions', 'options')
-# )
-# def callback(value):
-#     return ""
+
+@callback(
+    Output('operon-graph', 'children'),
+    Input('insert-email', 'value'),
+    Input('submissions', 'value')
+)
+def generate_graph_server(email, selected):
+    if selected != '':
+        sub_id = selected_submission(selected)
+        email_name = email.split('@')[0]
+        operon_file = operon_url(email, email_name, sub_id)
+        phylo_file = phylo_url(email, email_name, sub_id)
+        phylo_plot = html.Div([   
+                    html.H6('Currently viewing file: ' + sub_id),
+                    html.Hr(),
+                    dcc.Graph(
+                        id = 'phylo-plot',
+                        animate = False,
+                        responsive = True,
+                        figure = get_tree_plot(phylo_file),
+                        style = {
+                            'display': 'block',
+                            'margin-left': '10px', 
+                            'margin-top': '0px',
+                            'margin-bottom': '10px',
+                            'height': generate_phylo_dimensions(phylo_file)
+                        },
+                    config = {
+                            'displaylogo': False,
+                            'toImageButtonOptions': {
+                                    'format': 'svg',
+                                    'filename': sub_id,
+                                    'scale': 1}
+                            }
+                    )
+                ], style={
+                    'margin-left' : '30px', 
+                    'margin-top' : '50px',
+                    'margin-bottom' : '10px',
+                    'postion': 'relative', 
+                    'top': 0,
+                    'z-index': 0})
+        operon_plot = html.Div([
+                    html.H6('Currently viewing submission: ' + sub_id),
+                    html.Hr(),
+                    dcc.Graph(
+                        id = 'operon-plot',
+                        animate = False,
+                        responsive = True,
+                        figure = generate_operon(operon_file),
+                        style = {
+                            'display': 'block',
+                            'margin-left': '0px', 
+                            'margin-top': '10px',
+                            'margin-bottom': '10px',
+                            'height': get_operon_graph_dimensions(operon_file)
+                        },
+                        config = {
+                                'displaylogo': False,
+                                'toImageButtonOptions': {
+                                        'format': 'svg',
+                                        'filename': sub_id,
+                                        'scale': 1}
+                                }
+                    ),
+                ], style={
+                    'margin-left' : '0px', 
+                    'margin-top' : '50px',
+                    'margin-bottom' : '10px',
+                    'postion': 'relative', 
+                    'width': '95%',
+                    'top': 0,
+                    'z-index': 0}
+            )
+    return phylo_plot, operon_plot
 
 
 # Uploading files
-@callback(
-    Output('operon-graph', 'children'),
-    Input('upload-operon-file', 'contents'),
-    State('upload-operon-file', 'filename'),
-    State('upload-operon-file', 'last_modified'))
-def update_output(list_of_contents, list_of_names, list_of_dates):
-    if list_of_contents is not None:
-        children = [
-            generate_plot(c, n, d) for c, n, d in 
-            zip(list_of_contents, list_of_names, list_of_dates)]
-        return children
+# @callback(
+#     Output('operon-graph', 'children'),
+#     Input('upload-operon-file', 'contents'),
+#     State('upload-operon-file', 'filename'),
+#     State('upload-operon-file', 'last_modified'),
+#     )
+# def update_output(list_of_contents, list_of_names, list_of_dates):
+#     if list_of_contents is not None:
+#         children = [
+#             generate_plot(c, n, d) for c, n, d in 
+#             zip(list_of_contents, list_of_names, list_of_dates)]
+#         return children
 
 
 @callback(

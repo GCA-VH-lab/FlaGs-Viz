@@ -21,7 +21,7 @@ cd FlaGs-Viz
 
 3. Install dependencies
 ```
-pip3 install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 4. Run the program:

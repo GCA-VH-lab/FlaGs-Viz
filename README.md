@@ -19,10 +19,22 @@ git clone https://github.com/vedabojar/FlaGs-Viz.git
 cd FlaGs-Viz
 ```
 
-3. Run the program:
+3. Install dependencies
+```
+pip3 install -r requirements.txt
+```
+
+4. Run the program:
 ```
 python app.py
 ```
+
+Problems fetching files? Might be missing this:
+```
+pip install html5lib
+```
+
+
 
 ### Expected output
 (Output when pressing on the two buttons)

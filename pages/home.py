@@ -396,12 +396,6 @@ def submission_lists(email):
 
 
 
-
-# --------------------------- CREATING PLOTS ---------------------------
-
-
-
-
 # --------------------- CREATING PLOTS FROM DATA------------------------
 
 # 1. PHYLO PLOT

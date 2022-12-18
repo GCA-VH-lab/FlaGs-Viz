@@ -85,7 +85,7 @@ key elements:
 ### **app.py**
 This one is for running the app. At the bottom you can set the server and host
 port. I added the **wsgi.py** I used to deploy the app before. It's almost 
-the same as for a Flask 
+the same as for a Flask app except for the application vs. app name giving.
 
 
 ### **home.py**

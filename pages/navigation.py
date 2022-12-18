@@ -13,7 +13,6 @@ navbar = dbc.Navbar(
             ]),
             dbc.Col(
                 dbc.Nav([
-                    dbc.NavItem(dbc.NavLink('VizOne', href = '/vizone')),
                     dbc.NavItem(dbc.NavLink('Help', href = '/help'))
                 ], navbar = True),
             width = {'size': 'auto'})],

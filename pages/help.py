@@ -25,11 +25,12 @@ layout = html.Div([
         dbc.Accordion([
                 dbc.AccordionItem(
                     [
-                        dcc.Markdown(''' These are different phylogenetic tree 
-                        styles, see figure below. Currently, the 
-                        **'...ladderTree.nw'** file is supported in combination 
-                        with the operon plot, however it is still possible to
-                        upload and view the **'...tree.nw** file'.''',
+                        dcc.Markdown(''' These are the same trees with the 
+                        difference being rotation of some of the branches, see 
+                        figure below. Currently, only the **'...ladderTree.nw'** 
+                        file is supported in combination with the operon plot, 
+                        however it is still possible to upload and view 
+                        the **'...tree.nw** file'.''',
                         style = {'fontFamily': font_style}),
                         html.Div(
                             html.Img(src='data:image/png;base64,{}'.format(trees_base64),
@@ -45,22 +46,22 @@ layout = html.Div([
                 ),
                 dbc.AccordionItem(
                     [
-                        html.P("""Hovering over the node should display the 
+                        html.P('''Hovering over the node should display the 
                         node label, otherwise try re-loading the page. If the 
-                        issue still remians please contact us."""),
+                        issue still remians please contact us.'''),
                     ],
-                    title = """My phylogenetic tree is missing node labels""",
+                    title = '''My phylogenetic tree is missing node labels''',
                 ),
                 dbc.AccordionItem(
                     '''Yes! Hover close to the right upper corner of the plot 
-                    display the toolbar. Click on the camera icon to download 
-                    your plot in a .svg format''',
+                    to display the toolbar. Click on the camera icon to 
+                    download your plot in a .svg format''',
                     title = 'Can I download the plots?',
                 ),
                 dbc.AccordionItem([
                     dcc.Markdown( '''Longer query lists (>100 quries) can take 
                     longer to load, > 10s depending on legnth. To troubleshoot 
-                    for responsivness check if the browser tab is 
+                    for application responsivness check if the browser tab is 
                     **'Updating...'**. If your plot is still not displaying, 
                     contact us.'''),
                     html.Div(
@@ -83,9 +84,10 @@ layout = html.Div([
         dbc.Card([
             dbc.CardHeader('Contact us'),
             dbc.CardBody(
-                dcc.Markdown("""If you experience any issues, or have 
-                suggestions for imporvements and new features email us at 
-                **veda.bojar@med.lu.se**"""))
+                dcc.Markdown('''This is the first version of the 
+                application and we expect bugs. If you experience 
+                any issues, or have suggestions for imporvements and new 
+                features e-mail us at **veda.bojar@med.lu.se**'''))
         ])    
     ], style = {
         'margin-left' : '250px', 

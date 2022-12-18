@@ -15,6 +15,9 @@ git clone https://github.com/vedabojar/FlaGs-Viz.git
 ```
 
 2. Navigate to the directory containing the program
+```
+cd FlaGs-Viz
+```
 
 3. Run the program:
 ```
@@ -22,7 +25,8 @@ python app.py
 ```
 
 ### Expected output
-
+(Output when pressing on the two buttons)
+<img width="1438" alt="Screenshot 2022-12-18 at 13 45 43" src="https://user-images.githubusercontent.com/100831180/208305832-97365f2a-3fcc-47d0-a664-37dd774dcab7.png">
 
 
 ### Folder structure
@@ -66,6 +70,10 @@ key elements:
     * Important to note that the functions can have multiple inputs, but each
     output may be use only once. 
 
+### **app.py**
+This one is for running the app. At the bottom you can set the server and host
+port. 
+
 
 ### **home.py**
 The first page of the app, which is also the worst coded one is **home.py**.
@@ -89,4 +97,5 @@ Becuase it very long and complicated, here is its structure:
     * Action 1 - searching for submissions with e-mail
     * Action 2 - uploading submissions from local machine
 
-I guess the best thing is to have 5 - 7 as classes outside the home.py file
+I guess the best thing is to have 5 - 7 as classes outside the home.py file.
+I can work on this. 

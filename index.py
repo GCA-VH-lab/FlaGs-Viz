@@ -2,7 +2,9 @@ from dash import html, dcc
 from dash.dependencies import Input, Output
 
 import app as app
-from pages import help, home
+
+
+from pages import *
 
 application = app
 
@@ -14,10 +16,16 @@ app.layout = html.Div([
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
-    if pathname == '/help':
-        return help.layout
+    if pathname == '/find_submissions':
+        return b_find_submission.layout
+    elif pathname == '/upload_files':
+        return c_upload_files.layout
+    elif pathname == '/view_domains':
+        return d_view_domains.layout
+    elif pathname == '/create_logos':
+        return e_create_logos.layout
     else:
-        return home.layout
+        return a_cover_page.layout
 
 
 if __name__ == '__main__':

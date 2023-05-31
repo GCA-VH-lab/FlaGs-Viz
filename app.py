@@ -16,13 +16,13 @@ app = dash.Dash(__name__,
 
 
 server = app.server
-app.title = ('./assets/favicon.ico')
+
 
 
 app.layout = html.Div(children=[
     dash.page_container
 ])
-
+app.title = ('Flags Viz')
 
 if __name__ == '__main__':
     # Set debug to False when deploying

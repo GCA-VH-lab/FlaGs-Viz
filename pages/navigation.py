@@ -8,8 +8,7 @@ navbar = dbc.Navbar(
     dbc.Container([
         dbc.Row([
             dbc.Col([
-                #dbc.NavItem(dbc.NavLink('Home', href = '/')),
-                dbc.NavbarBrand('FlaGs Visualisation', className = 'ms-2', href = '/')
+                dbc.NavItem(dbc.NavLink('Flags Viz', href = '/'))
             ]),
             dbc.Col(
                 dbc.Nav([

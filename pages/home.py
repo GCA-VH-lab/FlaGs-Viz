@@ -45,7 +45,7 @@ import urllib.request
 
 # --------------------------- CREATE PAGE ------------------------------
 
-dash.register_page(__name__, path = '/')
+dash.register_page(__name__, path = '/home')
 
 
 

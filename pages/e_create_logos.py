@@ -97,6 +97,7 @@ def generate_arrow(n_clicks, start, end):
     # Create the arrow using Matplotlib
     fig, ax = plt.subplots()
     ax.arrow(start, 0, end - start, 2, head_width=0.05, head_length=0.1, fc="black", ec="black")
+    ax 
     ax.set_xlim(start - 1, end + 1)
     ax.set_ylim(-1, 1)
     ax.axis("off")

@@ -1,6 +1,29 @@
 # TAKES IN THE USER INPUT AND CREATES THE LOGO
 
+# Import packages
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import numpy as np
+import io
+import base64
+from PIL import Image
 
+
+def fig2img(fig):
+    # Convert Matplotlib figure to image
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png')
+    buf.seek(0)
+    img = Image.open(buf)
+    return img
+
+
+def image_to_base64(img):
+    # Convert image to base64 encoding
+    buf = io.BytesIO()
+    img.save(buf, format='png')
+    encoded_img = base64.b64encode(buf.getvalue()).decode()
+    return encoded_img
 
 
 def create_fig(start, end, domain_list = None):
@@ -14,75 +37,106 @@ def create_fig(start, end, domain_list = None):
         Returns a figure (graph) with protein and and its domains
     '''
 
-    # Lists to store shape specifics
-    # arrowList = []
-	# domainList = []
-	# accession_List = []
-	# gene_start_list=[]
-	# gene_end_list=[]
+    # Set up the figure
+    fig, ax = plt.subplots(figsize=(10, 3))
 
+    # Define arrow parameters
+    arrow_start = start
+    arrow_size = end - start
+    arrow_height = 0.4
 
-    arrowList = []
-    domainList = []
-    xList_gene = []
-    yList_gene = []
-    xList_domain = []
-    yList_domain = []
+    # Create the protein arrow
+    ax.arrow(
+        arrow_start, # protein start
+        0, # y_level
+        arrow_size, # protein size
+        0, # y_level upper
+        head_width=0.2, 
+        head_length=0.2, 
+        fc="gray", 
+        ec="black"
+    )
 
-    # Merging the two traces (protein + domain) into one plot
-    fig, ax = plt.subplots(1, 2, sharey = 'row', figsize=(x, y), gridspec_kw={'width_ratios': [5, 15]})    
+    # Create the domain arrows
+    if domain_list:
+        for domain in domain_list:
+            domain_start = domain[0] - start
+            domain_end = domain[1] - start
 
-    # Create a trace for the accession
-    for i, row in protein_coords_df.iterrows():
-        if row['accession'] == antitoxin:
-            # Extracting coordinates
-            protein_start = 1
-            protein_end = (row['size'])*factor_length
-            arrow_head = ((protein_end-protein_start)*(1/8))*factor_length
-            
-            # Setting shape specifics
-            xList_gene = [protein_start, protein_start, protein_end-arrow_head, protein_end, protein_end-arrow_head, protein_start]
-            yList_gene = [y_level-arrow_width, y_level+arrow_width, y_level+arrow_width, y_level, y_level-arrow_width, y_level-arrow_width]
-            arrowList.append(fig.add_trace(go.Scatter(x=xList_gene, y=yList_gene, fill="toself", fillcolor='#d9d9d9', opacity=0.5, line=(dict(color='#bfbfc0')), mode='lines+text')))
-
-            # Itterate through the domain data and get info for domains
-            for i, row in relevant_domains_df.iterrows():
-                domain_protein = row['Accession']
-                database = row['database']
-                domain_name = row['domain']
-                domain_start = int(row['query_hmm'].split('-')[0])*factor_length
-                domain_end = int(row['query_hmm'].split('-')[1])*factor_length
-                domain_size = (domain_end - domain_start)*factor_length
-                domain_score = row['score']
-                domain_color = domain_color
-
-                if antitoxin == domain_protein:
-                    xList_domain = [domain_start, domain_start, domain_end, domain_end, domain_start]
-                    yList_domain = [y_level-arrow_width, y_level+arrow_width, y_level+arrow_width, y_level-arrow_width, y_level-arrow_width]
-                    domainList.append(fig.add_trace(go.Scatter(x=xList_domain, y=yList_domain, fill="toself", hoverinfo = 'none', fillcolor=domain_color, line=dict(color=domain_color, width = 0), opacity = domain_opacity, mode='lines', name = domain_name)))                                     
-
-                    # 6c. Placing domain anontation above the domain.
-                    text_x = domain_start + (domain_size/2)
-                    fig.add_annotation(x = text_x, y = y_level, xref='x', yref='y', text = domain_name, font = dict(color = "black", size = 8, family = "Open Sans"), showarrow = False)
-
-            # Graph specifics
-            fig.update_xaxes(visible = False)
-            fig.update_yaxes(
-                visible = True, 
-                showgrid = False, 
-                showline = False,
-                range = [-2, 2], 
-                automargin = True, 
-                showticklabels = False, 
-                titlefont = dict(family = 'Open Sans', size = 8))
-            fig.update_layout(
-                autosize=False, 
-                width=300, 
-                height=300, 
-                margin=dict(l=10, r=10, t=10, b=10),
-                paper_bgcolor = transparent_background, 
-                plot_bgcolor = transparent_background, 
-                showlegend = False
+            # Draw the domain arrow
+            ax.arrow(
+                domain_start,
+                0,
+                domain_end - domain_start,
+                arrow_height,
+                head_width=0.2,
+                head_length=0.2,
+                fc="red",
+                ec="black",
             )
-            
-    return fig
+
+            # Annotate the domain name
+            text_x = domain_start + (domain_end - domain_start) / 2
+            ax.annotate(
+                domain[2],
+                xy=(text_x, arrow_height),
+                xytext=(0, 5),
+                textcoords="offset points",
+                ha="center",
+                fontsize=8,
+                color="black",
+            )
+
+    # Set the x-axis limits
+    ax.set_xlim(arrow_start - 1, arrow_size + 1)
+
+    # Remove y-axis ticks and labels
+    ax.yaxis.set_ticks([])
+
+    # Set the figure background color
+    fig.patch.set_facecolor("white")
+
+    # Remove plot frame
+    ax.spines["top"].set_visible(False)
+    ax.spines["bottom"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["left"].set_visible(False)
+
+    # Set plot size and margins
+    plt.subplots_adjust(left=0.05, right=0.95, top=0.9, bottom=0.1)
+
+    # Convert the Matplotlib figure to Plotly Figure object
+    fig_plotly = go.Figure()
+
+    # Convert the Matplotlib figure to an image
+    img = fig2img(fig)
+    encoded_img = image_to_base64(img)
+
+    # Add the image to Plotly Figure
+    fig_plotly.add_layout_image(
+        dict(
+            source=f"data:image/png;base64,{encoded_img}",
+            xref="x",
+            yref="y",
+            x=arrow_start,
+            y=0,
+            sizex=arrow_size,
+            sizey=arrow_height,
+            sizing="stretch",
+            layer="below",
+        )
+    )
+
+    # Set the layout of Plotly Figure
+    fig_plotly.update_layout(
+        xaxis={"visible": False},
+        yaxis={"visible": False},
+        width=800,
+        height=800,
+    )
+
+    return fig_plotly
+
+
+
+create_fig(0, 10)

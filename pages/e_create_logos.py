@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import io
 import base64
 import pandas as pd
+import urllib
 
 # Import pages
 from pages import navigation
@@ -31,11 +32,11 @@ domains = []
 
 # Define the domain table columns
 domain_columns = [
-    {"name": "Domain Name", "id": "name"},
-    {"name": "Domain Start", "id": "start"},
-    {"name": "Domain End", "id": "end"},
-    {"name": "Domain Color", "id": "color"},
-    {"name": "", "id": "remove", "presentation": "markdown"}
+    {'name': 'Domain Name', 'id': 'name'},
+    {'name': 'Domain Start', 'id': 'start'},
+    {'name': 'Domain End', 'id': 'end'},
+    {'name': 'Domain Color', 'id': 'color'},
+    {'name': '', 'id': 'remove', 'presentation': 'markdown'}
 ]
 
 
@@ -52,20 +53,12 @@ layout = html.Div([
                         html.H6('Gene Start:')
                     ),
                     dbc.Col(
-                        dcc.Input(
-                            id="input-start", 
-                            type="number", 
-                            value=1, 
-                            style={'width': '80px'}
-                        )
-                    ),
-                    dbc.Col(
-                        html.H6('Gene End:')
+                        html.H6('Length (aa):')
                     ),
                     dbc.Col(
                         dcc.Input(
-                            id="input-end", 
-                            type="number", 
+                            id='input-length', 
+                            type='number', 
                             value=100, 
                             style={'width': '80px'}
                         )
@@ -75,10 +68,10 @@ layout = html.Div([
                     'padding': '20px'
                 }),
                 dbc.Col([
-                    html.Label("Arrow Color:"),
+                    html.Label('Gene Color:'),
                     daq.ColorPicker(
-                        id="input-color",
-                        value={"hex": "#000000"}
+                        id='input-color',
+                        value={'hex': '#000000'}
                     ),
                 ], style={
                     'width': 2,
@@ -92,8 +85,8 @@ layout = html.Div([
                     ),
                     dbc.Col(
                         dcc.Input(
-                            id="input-domain-start",
-                            type="number",
+                            id='input-domain-start',
+                            type='number',
                             value=1,
                             style={'width': '80px'}
                         )
@@ -103,8 +96,8 @@ layout = html.Div([
                     ),
                     dbc.Col(
                         dcc.Input(
-                            id="input-domain-end",
-                            type="number",
+                            id='input-domain-end',
+                            type='number',
                             value=20,
                             style={'width': '80px'}
                         )
@@ -114,15 +107,15 @@ layout = html.Div([
                     ),
                     dbc.Col(
                         dcc.Input(
-                            id="input-domain-name",
-                            type="text",
-                            value=""
+                            id='input-domain-name',
+                            type='text',
+                            value=''
                         )
                     ),
                     dbc.Col(
                         html.Button(
-                            "Add Domain", 
-                            id="button-add-domain", 
+                            'Add Domain', 
+                            id='button-add-domain', 
                             style={'margin-left': '20px'})
                     ),
                 ], style={
@@ -131,13 +124,13 @@ layout = html.Div([
                 }),
                 dbc.Col([
                     dbc.Col(
-                        html.Label("Domain Color:"),
+                        html.Label('Domain Color:'),
                         style={'margin-left': '20px'}
                     ),
                     dbc.Col(
                         daq.ColorPicker(
-                            id="input-domain-color",
-                            value={"hex": "#FF0000"}
+                            id='input-domain-color',
+                            value={'hex': '#FF0000'}
                         )
                     ),
                 ], style={
@@ -145,8 +138,25 @@ layout = html.Div([
                     'padding': '20px'
                 }),
             ], style={'padding': '20px'}),
-            dbc.Row(html.Div(id="domain-table-container")), 
-            dbc.Row(html.Button("Generate Arrow", id="button-generate"))
+            html.Hr(),
+            dbc.Row(
+                html.Div(id='domain-table-container')
+            ), 
+            html.Hr(),
+            dbc.Row([
+                html.Button(
+                    'Create Logo', 
+                    id='button-create',
+                    style={'padding':'10px'}
+                )
+        ],  style={'padding' : '20px'}),
+            dbc.Row([
+                html.Button(
+                    'Download Logo', 
+                    id='button-download',
+                    style={'padding':'10px'}
+                )
+        ],  style={'padding' : '20px'})
         ], width={
             'size': 4,
             'offset': 0},
@@ -155,7 +165,7 @@ layout = html.Div([
                 'background': container_background}),
         dbc.Col([], style={'width': 1}),
         dbc.Col([
-            dcc.Graph(id="arrow-output"),
+            dcc.Graph(id='arrow-output'),
         ], width={
             'size': 7,
             'offset': 0},
@@ -170,45 +180,23 @@ layout = html.Div([
 
 
 @callback(
-    Output("arrow-output", "figure"),
+    Output('domain-table-container', 'children'),
+    [Input('button-add-domain', 'n_clicks')],
     [
-        Input("button-generate", "n_clicks"),
-        Input('input-color', 'value')
-    ],
-    [State("input-start", "value"),
-     State("input-end", "value")]
-)
-def generate_arrow(n_clicks, start, end):
-    if n_clicks is None:
-        return {}
-
-    # Create the arrow using Matplotlib
-    logo = create_fig(start, end)
-
-    # Return the figure as a dictionary for Dash graph
-    return logo 
-
-
-
-
-@callback(
-    dash.dependencies.Output("domain-table-container", "children"),
-    [dash.dependencies.Input("button-add-domain", "n_clicks")],
-    [
-        dash.dependencies.State("input-domain-start", "value"),
-        dash.dependencies.State("input-domain-end", "value"),
-        dash.dependencies.State("input-domain-name", "value"),
-        dash.dependencies.State("input-domain-color", "value"),
+        State('input-domain-start', 'value'),
+        State('input-domain-end', 'value'),
+        State('input-domain-name', 'value'),
+        State('input-domain-color', 'value'),
     ],
 )
 def update_domain_table(n_clicks, domain_start, domain_end, domain_name, domain_color):
     if n_clicks:
         # Create a new domain dictionary
         domain = {
-            "Name": domain_name,
-            "Start": domain_start,
-            "End": domain_end,
-            "Color": domain_color["hex"],
+            'Name': domain_name,
+            'Start': domain_start,
+            'End': domain_end,
+            'Color': domain_color['hex'],
         }
         # Append the domain to the list
         domains.append(domain)
@@ -218,18 +206,18 @@ def update_domain_table(n_clicks, domain_start, domain_end, domain_name, domain_
 
     # Create the table
     table = dash_table.DataTable(
-        data=table_data.to_dict("records"),
-        columns=[{"name": col, "id": col} for col in table_data.columns],
-        style_table={"overflowX": "auto"},
-        style_cell={"textAlign": "left"},
+        data=table_data.to_dict('records'),
+        columns=[{'name': col, 'id': col} for col in table_data.columns],
+        style_table={'overflowX': 'auto'},
+        style_cell={'textAlign': 'left'},
         style_data_conditional=[
             {
-                "if": {"row_index": "even"},
-                "backgroundColor": "rgb(248, 248, 248)",
+                'if': {'row_index': 'even'},
+                'backgroundColor': 'rgb(248, 248, 248)',
             },
             {
-                "if": {"row_index": "odd"},
-                "backgroundColor": "rgb(230, 230, 230)",
+                'if': {'row_index': 'odd'},
+                'backgroundColor': 'rgb(230, 230, 230)',
             },
         ],
     )
@@ -237,3 +225,46 @@ def update_domain_table(n_clicks, domain_start, domain_end, domain_name, domain_
     return table
 
 
+
+
+@callback(
+    Output('arrow-output', 'figure'),
+    [
+        Input('button-create', 'n_clicks'), 
+        Input('domain-table-container', 'children')
+    ],
+    [
+        State('input-length', 'value'), 
+        State('input-color', 'value')
+     ]
+)
+def generate_arrow(n_clicks, domains, length, logo_color):
+    if n_clicks is None:
+        return {}
+
+    data = domains['props']['data']
+    domains_list = pd.DataFrame(data)
+
+    # Create the arrow using Matplotlib
+    logo = create_fig(length, logo_color, domains_list)
+
+    # Return the figure as a dictionary for Dash graph
+    return logo 
+
+
+
+
+@callback(
+    Output('button-download', 'href'),
+    Input('button-download', 'n_clicks')
+)
+def download_svg(n_clicks):
+    if n_clicks is not None and n_clicks > 0:
+        return 'data:image/svg+xml;charset=utf-8,' + urllib.parse.quote(get_svg_data(), safe='')
+
+def get_svg_data():
+    # Generate the SVG data for the arrow shape
+    svg_data = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' \
+               '<path d="M0,0 L90,0 L100,50 L90,100 L0,100 Z" fill="black" stroke="black" stroke-width="1" />' \
+               '</svg>'
+    return svg_data

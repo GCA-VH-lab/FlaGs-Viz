@@ -7,3 +7,4 @@ dash_daq==0.5.0
 pandas==1.4.0
 plotly==5.6.0
 requests==2.27.1
+mpld3==0.5.9

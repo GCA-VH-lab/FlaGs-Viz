@@ -21,29 +21,18 @@ from functions.drawing_logos import *
 # Import layout specifics
 from assets.color_scheme import *
 
+
 # ---------------------------- INDEX PAGE ------------------------------
 
 dash.register_page(__name__, path = '/create_logos')
 
 
 
-# List to store the added domains
-domains = []
-
-# Define the domain table columns
-domain_columns = [
-    {'name': 'Domain Name', 'id': 'name'},
-    {'name': 'Domain Start', 'id': 'start'},
-    {'name': 'Domain End', 'id': 'end'},
-    {'name': 'Domain Color', 'id': 'color'},
-    {'name': '', 'id': 'remove', 'presentation': 'markdown'}
-]
-
-
 
 # ----------------------------- LAYOUT ---------------------------------
 
 layout = html.Div([
+    html.Link(href='../assets/custom.css'),
     navigation.navbar,
     dbc.Row([
         dbc.Col([
@@ -123,26 +112,58 @@ layout = html.Div([
                     'padding': '20px'
                 }),
                 dbc.Col([
-                    dbc.Col(
-                        html.Label('Domain Color:'),
-                        style={'margin-left': '20px'}
-                    ),
-                    dbc.Col(
-                        daq.ColorPicker(
-                            id='input-domain-color',
-                            value={'hex': '#FF0000'}
-                        )
+                    html.Label('Domain Color:'),
+                    daq.ColorPicker(
+                        id='input-domain-color',
+                        value={'hex': '#000000'}
                     ),
                 ], style={
                     'width': 2,
                     'padding': '20px'
-                }),
+                })
             ], style={'padding': '20px'}),
             html.Hr(),
             dbc.Row(
                 html.Div(id='domain-table-container')
             ), 
             html.Hr(),
+            dbc.Row([
+                dbc.Col([
+                    dbc.Col(
+                        html.H6('Mutation Name:')
+                    ),
+                    dbc.Col(
+                        dcc.Input(
+                            id='input-mutation-name',
+                            type='text',
+                            value=''
+                        )
+                    ),
+                    dbc.Col(
+                        html.H6('Mutation Position:')
+                    ),
+                    dbc.Col(
+                        dcc.Input(
+                            id='input-mutation-position',
+                            type='number',
+                            value=''
+                        )
+                    ),
+                    dbc.Col(
+                        html.Button(
+                            'Add Mutation', 
+                            id='button-add-mutation', 
+                            style={'margin-left': '20px'})
+                    ),
+                ], style={
+                    'width': 3,
+                    'padding': '20px'
+                })
+            ]),
+            html.Hr(),
+            dbc.Row(
+                html.Div(id='mutation-table-container')
+            ), 
             dbc.Row([
                 html.Button(
                     'Create Logo', 
@@ -174,6 +195,70 @@ layout = html.Div([
                 'background': container_background})
     ], style={'padding': '60px'})
 ])
+
+
+
+
+# ------------------------------ LISTS ---------------------------------
+
+# List to store the added domains
+domains = []
+mutations = []
+
+# Define the domain table columns
+# domain_columns = [
+#     {'name': 'Domain Name', 'id': 'name'},
+#     {'name': 'Domain Start', 'id': 'start'},
+#     {'name': 'Domain End', 'id': 'end'},
+#     {'name': 'Domain Color', 'id': 'color'},
+#     {'name': '', 'id': 'remove', 'presentation': 'markdown'}
+# ]
+
+
+# --------------------------- CALLBACKS --------------------------------
+
+
+@callback(
+    Output('mutation-table-container', 'children'),
+    [Input('button-add-mutation', 'n_clicks')],
+    [
+        State('input-mutation-name', 'value'),
+        State('input-mutation-position', 'value'),
+    ],
+)
+def update_domain_table(n_clicks, mutation_name, mutation_position):
+    if n_clicks:
+        # Create a new mutation dictionary
+        mutation = {
+            'Name': mutation_name,
+            'Position': mutation_position,
+        }
+        # Append the mutation to the list
+        mutations.append(mutation)
+
+    # Create the table data
+    table_data = pd.DataFrame(mutations)
+
+    # Create the table
+    table = dash_table.DataTable(
+        data=table_data.to_dict('records'),
+        columns=[{'name': col, 'id': col} for col in table_data.columns],
+        style_table={'overflowX': 'auto'},
+        style_cell={'textAlign': 'left'},
+        style_data_conditional=[
+            {
+                'if': {'row_index': 'even'},
+                'backgroundColor': 'rgb(248, 248, 248)',
+            },
+            {
+                'if': {'row_index': 'odd'},
+                'backgroundColor': 'rgb(230, 230, 230)',
+            },
+        ],
+    )
+
+    return table
+
 
 
 
@@ -223,6 +308,9 @@ def update_domain_table(n_clicks, domain_start, domain_end, domain_name, domain_
     )
 
     return table
+
+
+
 
 
 

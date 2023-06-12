@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import colorsys
 
+# Import layout specifics
+from assets.color_scheme import *
 
 
 
@@ -29,8 +31,15 @@ def darken_color(color, percentage):
 
 
 
+def calculate_upper_point_y(x0, y0, x1, y1):
+    slope = (y1 - y0) / (x1 - x0)
+    upper_y = y0 + slope * (10 - x0)  # Assuming upper x coordinate is 10
+    return upper_y
 
-def create_fig(length, logo_color, domains_list = None):
+
+
+
+def create_fig(length, logo_color, domains_list = None, mutations_list = None):
     '''
     Creating a protein logo figure including the domain inside it.
     Args:
@@ -87,27 +96,53 @@ def create_fig(length, logo_color, domains_list = None):
                 'y1': arrow_width
             }
         ]
-        if domains_list != '':
-            for domain in domain_list:
-                domain_start = domain['start']
-                domain_end = domain['end']
-                domain_name = domain['name']
-                domain_middle = (domain_start + domain_end) / 2
+        annotations = []
+        if len(domains_list) > 0:
+            for index, row in domains_list.iterrows():
+                domain_name = row['Name']
+                domain_start = row['Start']
+                domain_end = row['End']
+                domain_color = row['Color']
+                domain_middle = domain_start+((domain_end-domain_start)/2)
+                domain_end_head = (arrow_end*arrow_point)/domain_end 
 
                 # Create a shape that matches the arrow shape
-                arrow_shape = f'M{domain_start},0 L{arrow_minus_head},0 L{length},{arrow_point} L{arrow_minus_head},{arrow_width} L{domain_start},{arrow_width} Z'
+                arrow_shape = f'''
+                    M{domain_start},{arrow_width-5.75} 
+                    L{arrow_minus_head},{arrow_width-5.75} 
+                    L{length-0.5},{arrow_point} 
+                    L{arrow_minus_head},{arrow_width-0.25} 
+                    L{domain_start},{arrow_width-0.25} 
+                    Z'''
 
-                # Adjust the domain shape if it doesn't cover the full arrow head
-                if domain_end < arrow_minus_head:
-                    domain_shape = f'M{domain_start},0 L{domain_end},0 L{domain_end},{arrow_width} L{domain_start},{arrow_width} Z'
+                if domain_end <= arrow_minus_head:
+                    # Domain ends within the area before the arrow head
+                    domain_shape = f'''
+                        M{domain_start},{arrow_width-5.75} 
+                        L{domain_end},{arrow_width-5.75} 
+                        L{domain_end},{arrow_width-0.25} 
+                        L{domain_start},{arrow_width-0.25} 
+                        Z'''
+                elif domain_end > arrow_minus_head and domain_end < arrow_end:
+                    # Domain ends withing the arrow head
+                    domain_shape = f'''
+                        M{domain_start},{arrow_width-5.75} 
+                        L{arrow_minus_head},{arrow_width-5.75} 
+                        L{domain_end},{domain_end_head} 
+                        L{domain_end},{domain_end_head} 
+                        L{arrow_minus_head},{arrow_width-0.25} 
+                        L{domain_start},{arrow_width-0.25} 
+                        Z'''
                 else:
+                    # Domain covers the full arrow head
                     domain_shape = arrow_shape
+
 
                 shapes.append(
                     {
                         'type': 'path',
                         'path': domain_shape,
-                        'fillcolor': 'rgba(0, 0, 0, 0.2)',  # Customize the fill color for the highlighted area
+                        'fillcolor': domain_color,  # Customize the fill color for the highlighted area
                         'line': {
                             'width': 0
                         },
@@ -119,26 +154,27 @@ def create_fig(length, logo_color, domains_list = None):
                         'y1': arrow_width
                     }
                 )
-
-                shapes.append(
+                annotations.append(
                     {
-                        'type': 'text',
+                        'text': domain_name,
                         'xref': 'x',
                         'yref': 'y',
                         'x': domain_middle,
-                        'y': arrow_width + 10,  # Adjust the vertical position as needed
-                        'text': domain_name,
+                        'y': arrow_width + (arrow_width/3),  # Adjust the vertical position as needed
                         'showarrow': False,
                         'font': {
-                            'size': 12,
+                            'family': 'Helvetica',
+                            'size': 15,
                             'color': 'black'
                         }
                     }
                 )
+
     return {
         'data': [],
         'layout': {
             'shapes': shapes,
+            'annotations': annotations,
             'xaxis': {
                 'range': [arrow_start - x_padding, arrow_end + x_padding],
                 'constrain': 'domain',
@@ -153,8 +189,8 @@ def create_fig(length, logo_color, domains_list = None):
             'width': 800,
             'margin': {'t': 0, 'b': 0, 'l': 0, 'r': 0},
             'showlegend': False,
-            'plot_bgcolor': 'white',
-            'paper_bgcolor': 'white'
+            'plot_bgcolor': transparent_background,
+            'paper_bgcolor': transparent_background
         }
     }
 

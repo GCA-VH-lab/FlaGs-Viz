@@ -13,7 +13,7 @@ from pages import navigation
 
 # ---------------------------- INDEX PAGE ------------------------------
 
-dash.register_page(__name__, path = '/')
+dash.register_page(__name__, path = '/', name='Home')
 
 
 
@@ -21,126 +21,131 @@ dash.register_page(__name__, path = '/')
 # Define the front page layout
 layout = html.Div([
     navigation.navbar,
+    html.Br(),
     dbc.Row([
-        html.H5('''Welcome to Flags Viz. You can either try to find recent runs
-        stored on the server or upload your own. Or maybe even mamke your own 
-        genes and domains''')
+        html.H5('''Welcome to FlaGs Viz. Here you can visualise your WebFlaGs
+        results with or without domain search. Even make your own custom 
+        protein logos with domains.''')
     ], style = {        
         'margin-left' : '40px',
         'margin-right' : '40px',
         'margin-top' : '40px'}),
+    html.Br(),
     dbc.Row([
         dbc.Col(
             dbc.Card([
                 dbc.CardImg(
-                    src="./assets/04_b&w.png",  # Path to your black and white image
-                    id="image1",
+                    src='./assets/option_0.png',  # Path to your black and white image
+                    id='image1',
                     top=True,
-                    className="hover-image",
+                    className='hover-image',
                 ),
                 dbc.CardBody([
-                        html.H4("Find Submission", className="card-title"),
+                        html.H4('Find Submission', className='card-title'),
                         html.P(
-                            '''Recently run WebFlags? You may access your
-                            submission if it is still stored on our server''',
-                            className="card-text",
+                            '''We're working on allowing you to access your 
+                            runs directly from our server. Stay tuned.''',
+                            className='card-text',
                         ),
                         dbc.Button(
-                            "Let's Go",
-                            color="primary",
-                            href="/find_submission",
+                            'Loading...',
+                            color='secondary',
+                            #href='/find_submission',
                         ),
                     ]),
                 ],
-                style={"width": "22rem"},
-                className="mb-3",
+                style={'width': '22rem'},
+                className='mb-3',
             ),
             width=3,
-            align="center",
+            align='center',
         ),
         dbc.Col(
             dbc.Card( [
                 dbc.CardImg(
-                    src="./assets/04_b&w.png",  # Path to your black and white image
-                    id="image2",
+                    src='./assets/option_1.png', 
+                    id='image2',
                     top=True,
-                    className="hover-image",
+                    className='hover-image',
                 ),
                 dbc.CardBody([
-                        html.H4("Upload Files", className="card-title"),
+                        html.H4('Upload Local Files', className='card-title'),
                         html.P(
-                            '''Couldn't find your submission or you have older
-                            WebFlags runs, upload and view them here''',
-                            className="card-text",
+                            '''Did you run WebFlaGs with domain search? Or 
+                            maybe not? You can view your your WebFlaGs 
+                            results here.''',
+                            className='card-text',
                         ),
                         dbc.Button(
-                            "Let's Go",
-                            color="primary",
-                            href="/upload_files",
+                            'This one!',
+                            color='primary',
+                            href='/view_domains',
                         ),
                     ]),
                 ],
-                style={"width": "22rem"},
-                className="mb-3",
+                style={'width': '22rem'},
+                className='mb-3',
             ),
             width=3,
-            align="center",
+            align='center',
         ),
         dbc.Col(
             dbc.Card( [
                 dbc.CardImg(
-                    src="./assets/04_b&w.png",  # Path to your black and white image
-                    id="image1",
+                    src='./assets/option_2.png', 
+                    id='image1',
                     top=True,
-                    className="hover-image",
+                    className='hover-image',
                 ),
                 dbc.CardBody([
-                        html.H4("View Domains", className="card-title"),
+                        html.H4('3 Domain Databases', className='card-title'),
                         html.P(
-                            '''Did you run WebFlags with the domain search?
-                            Then you can view and interact with them here ''',
-                            className="card-text",
+                            '''If you have your hands on a super special 
+                            domain search file, you can see all the 
+                            database domain hits here. ''',
+                            className='card-text',
                         ),
                         dbc.Button(
-                            "Let's Go",
-                            color="primary",
-                            href="/view_domains",
+                            'Take me here',
+                            color='primary',
+                            href='/3_databases',
                         ),
                     ]),
                 ],
-                style={"width": "22rem"},
-                className="mb-3",
+                style={'width': '22rem'},
+                className='mb-3',
             ),
             width=3,
-            align="center",
+            align='center',
         ),
         dbc.Col(
             dbc.Card( [
                 dbc.CardImg(
-                    src="./assets/04_b&w.png",  # Path to your black and white image
-                    id="image1",
+                    src='./assets/option_3.png',  # Path to your black and white image
+                    id='image1',
                     top=True,
-                    className="hover-image",
+                    className='hover-image',
                 ),
                 dbc.CardBody([
-                        html.H4("Create Logos", className="card-title"),
+                        html.H4('Create Logos', className='card-title'),
                         html.P(
-                            '''Did you run WebFlags with the domain search?
-                            Then you can view and interact with them here ''',
-                            className="card-text",
+                            '''When you need a quick custom protein logo
+                            visualisation with domains
+                            and/or mutataions.''',
+                            className='card-text',
                         ),
                         dbc.Button(
-                            "Let's Go",
-                            color="primary",
-                            href="/create_logos",
+                            "Let's Draw",
+                            color='primary',
+                            href='/create_logos',
                         ),
                     ]),
                 ],
-                style={"width": "22rem"},
-                className="mb-3",
+                style={'width': '22rem'},
+                className='mb-3',
             ),
             width=3,
-            align="center",
+            align='center',
         ),
         # Repeat the above code for the other columns
     ], style={

@@ -9,6 +9,13 @@ import colorsys
 from assets.color_scheme import *
 
 
+def rgba_to_hex(rgba_color):
+    r = rgba_color['r']
+    g = rgba_color['g']
+    b = rgba_color['b']
+    a = int(rgba_color['a'] * 255)
+    hex_string = f'#{r:02x}{g:02x}{b:02x}{a:02x}'
+    return hex_string
 
 
 def darken_color(color, percentage):
@@ -39,7 +46,7 @@ def calculate_upper_point_y(x0, y0, x1, y1):
 
 
 
-def create_fig(length, logo_color, domains_list = None, mutations_list = None):
+def create_fig(length, logo_color, domains_list=None, mutations_list=None):
     '''
     Creating a protein logo figure including the domain inside it.
     Args:
@@ -47,7 +54,7 @@ def create_fig(length, logo_color, domains_list = None, mutations_list = None):
         logo_color: Color of the protein arrow
         domain_list: contains any domains specified by user
     Returns:
-        Returns a figure (graph) with protein and and its domains
+        Returns a figure (graph) with protein and its domains
     '''
     if length == 0:
         return {}
@@ -103,8 +110,8 @@ def create_fig(length, logo_color, domains_list = None, mutations_list = None):
                 domain_start = row['Start']
                 domain_end = row['End']
                 domain_color = row['Color']
-                domain_middle = domain_start+((domain_end-domain_start)/2)
-                domain_end_head = (arrow_end*arrow_point)/domain_end 
+                domain_middle = domain_start + ((domain_end - domain_start) / 2)
+                domain_end_head = (arrow_end * arrow_point) / domain_end
 
                 # Create a shape that matches the arrow shape
                 arrow_shape = f'''
@@ -124,7 +131,7 @@ def create_fig(length, logo_color, domains_list = None, mutations_list = None):
                         L{domain_start},{arrow_width-0.25} 
                         Z'''
                 elif domain_end > arrow_minus_head and domain_end < arrow_end:
-                    # Domain ends withing the arrow head
+                    # Domain ends within the arrow head
                     domain_shape = f'''
                         M{domain_start},{arrow_width-5.75} 
                         L{arrow_minus_head},{arrow_width-5.75} 
@@ -136,7 +143,6 @@ def create_fig(length, logo_color, domains_list = None, mutations_list = None):
                 else:
                     # Domain covers the full arrow head
                     domain_shape = arrow_shape
-
 
                 shapes.append(
                     {
@@ -160,7 +166,43 @@ def create_fig(length, logo_color, domains_list = None, mutations_list = None):
                         'xref': 'x',
                         'yref': 'y',
                         'x': domain_middle,
-                        'y': arrow_width + (arrow_width/3),  # Adjust the vertical position as needed
+                        'y': arrow_width + (arrow_width / 3),  
+                        'showarrow': False,
+                        'font': {
+                            'family': 'Helvetica',
+                            'size': 15,
+                            'color': 'black'
+                        }
+                    }
+                )
+
+        if len(mutations_list) > 0:
+            for index, row in mutations_list.iterrows():
+                mutation_name = row['Name']
+                mutation_position = row['Position']
+
+                annotations.append(
+                    {
+                        'text': '*',
+                        'xref': 'x',
+                        'yref': 'y',
+                        'x': mutation_position,
+                        'y': arrow_width / 3, 
+                        'showarrow': False,
+                        'font': {
+                            'family': 'Helvetica',
+                            'size': 40,
+                            'color': 'black'
+                        }
+                    }
+                )
+                annotations.append(
+                    {
+                        'text': mutation_name,
+                        'xref': 'x',
+                        'yref': 'y',
+                        'x': mutation_position,
+                        'y': -1.5,  
                         'showarrow': False,
                         'font': {
                             'family': 'Helvetica',
@@ -178,12 +220,14 @@ def create_fig(length, logo_color, domains_list = None, mutations_list = None):
             'xaxis': {
                 'range': [arrow_start - x_padding, arrow_end + x_padding],
                 'constrain': 'domain',
-                'showticklabels': False
+                'showticklabels': False,
+                'visible': False
             },
             'yaxis': {
                 'range': [-y_padding, arrow_width + y_padding],
                 'constrain': 'domain',
-                'showticklabels': False
+                'showticklabels': False,
+                'visible': False
             },
             'height': 400,
             'width': 800,
@@ -196,5 +240,45 @@ def create_fig(length, logo_color, domains_list = None, mutations_list = None):
 
 
 
-
 create_fig(0, 10)
+
+
+
+
+import plotly.graph_objects as go
+
+def placeholder_graph():
+    fig_none = go.Figure()
+    fig_none.add_annotation(
+        x=0.5,
+        y=0.5,
+        text='waiting for your creation... :)',
+        font=dict(size=20),
+        showarrow=False,
+        xanchor='center',
+        yanchor='middle',
+        align='center',
+        xref='paper',
+        yref='paper'
+    )
+    fig_none.update_layout(
+        paper_bgcolor='white',
+        plot_bgcolor='white',
+        xaxis=dict(
+            showticklabels=False,
+            showgrid=False,
+            zeroline=False
+        ),
+        yaxis=dict(
+            showticklabels=False,
+            showgrid=False,
+            zeroline=False
+        )
+    )
+    return fig_none
+
+
+
+
+
+

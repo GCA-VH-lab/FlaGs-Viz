@@ -18,12 +18,12 @@ app.layout = html.Div([
 def display_page(pathname):
     if pathname == '/find_submissions':
         return b_find_submission.layout
-    elif pathname == '/upload_files':
-        return c_upload_files.layout
     elif pathname == '/view_domains':
         return d_view_domains.layout
     elif pathname == '/create_logos':
         return e_create_logos.layout
+    elif pathname == '/3_databases':
+        return f_3_database.layout
     else:
         return a_cover_page.layout
 

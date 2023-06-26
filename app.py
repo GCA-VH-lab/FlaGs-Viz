@@ -25,5 +25,5 @@ app.layout = html.Div(children=[
 app.title = ('Flags Viz')
 
 if __name__ == '__main__':
-    # Set debug to False when deploying
-    app.run_server(host = '0.0.0.0', port = '8080', debug = True)
+    # Set debug to True when working on app
+    app.run_server(host = '0.0.0.0', port = '8080', debug = False)

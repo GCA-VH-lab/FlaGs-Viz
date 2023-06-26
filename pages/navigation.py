@@ -1,4 +1,5 @@
 import dash
+import base64
 from dash import html
 
 import dash_bootstrap_components as dbc
@@ -8,12 +9,12 @@ navbar = dbc.Navbar(
     dbc.Container([
         dbc.Row([
             dbc.Col([
-                dbc.NavItem(dbc.NavLink('Flags Viz', href = '/'))
+                dbc.NavItem(dbc.NavLink('FlaGs Viz', href = '/', style={'fontSize': '20px', 'color': 'white'}))
             ]),
             dbc.Col(
-                dbc.Nav([
-                    dbc.NavItem(dbc.NavLink('Help', href = '/help'))
-                ], navbar = True),
+                # dbc.Nav([
+                #     dbc.NavItem(dbc.NavLink('Help', href = '/help'))
+                # ], navbar = True),
             width = {'size': 'auto'})],
         align = 'center', 
         className = 'g-0'),

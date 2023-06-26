@@ -20,7 +20,8 @@ from functions.operon_plot import *
 
 # ---------------------------- INDEX PAGE ------------------------------
 
-dash.register_page(__name__, path = '/find_submission')
+dash.register_page(__name__, path = '/find_submission', name='Submissions')
+
 
 
 
@@ -43,7 +44,7 @@ layout = html.Div([
                     ''')
                 ],  style={
                         'margin-left' : '20px',
-                        'margin-top' : '5px',
+                        'margin-top' : '50px',
                         'margin-bottom' : '10px',
                         'width': '70%', 
                         }),

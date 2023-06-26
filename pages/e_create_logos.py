@@ -24,7 +24,8 @@ from assets.color_scheme import *
 
 # ---------------------------- INDEX PAGE ------------------------------
 
-dash.register_page(__name__, path = '/create_logos')
+dash.register_page(__name__, path = '/create_logos', name='Create Logos')
+
 
 
 
@@ -36,163 +37,222 @@ layout = html.Div([
     navigation.navbar,
     dbc.Row([
         dbc.Col([
-            dbc.Row([
-                dbc.Col([
-                    dbc.Col(
-                        html.H6('Gene Start:')
-                    ),
-                    dbc.Col(
-                        html.H6('Length (aa):')
-                    ),
-                    dbc.Col(
+            dbc.Container([
+                dbc.Row([
+                    html.H5('Base'),
+                    html.Br(),
+                    dbc.Col([
+                        'Length (aa):',
                         dcc.Input(
                             id='input-length', 
                             type='number', 
-                            value=100, 
-                            style={'width': '80px'}
-                        )
-                    )
-                ], style={
-                    'width': 4,
-                    'padding': '20px'
-                }),
-                dbc.Col([
-                    html.Label('Gene Color:'),
-                    daq.ColorPicker(
-                        id='input-color',
-                        value={'hex': '#000000'}
-                    ),
-                ], style={
-                    'width': 2,
-                    'padding': '20px'
-                })
-            ]),
-            dbc.Row([
-                dbc.Col([
-                    dbc.Col(
-                        html.H6('Domain Start:')
-                    ),
-                    dbc.Col(
-                        dcc.Input(
-                            id='input-domain-start',
-                            type='number',
-                            value=1,
-                            style={'width': '80px'}
-                        )
-                    ),
-                    dbc.Col(
-                        html.H6('Domain End:')
-                    ),
-                    dbc.Col(
-                        dcc.Input(
-                            id='input-domain-end',
-                            type='number',
-                            value=20,
-                            style={'width': '80px'}
-                        )
-                    ),
-                    dbc.Col(
-                        html.H6('Domain Name:')
-                    ),
-                    dbc.Col(
-                        dcc.Input(
-                            id='input-domain-name',
-                            type='text',
-                            value=''
-                        )
-                    ),
-                    dbc.Col(
-                        html.Button(
+                            value=100)
+                    ]),
+                    dbc.Col([
+                        html.Label('Gene Color:'),
+                        daq.ColorPicker(
+                            id='input-color',
+                            value={'rgb': {'r': 237, 'g': 237, 'b': 237, 'a': 1}}
+                        ),
+                    ])
+                ]),
+            ],  style={
+                    'background-color': page_background,
+                    'border-radius': '10px', 
+                    'padding':'20px',
+                    'margin-top': '20px'
+                },
+            ),
+            dbc.Row(),
+            dbc.Container([
+                dbc.Row([
+                    html.H5('Domains'),
+                    dbc.Col([
+                        dbc.Row([
+                            'Domain Start:', 
+                            dcc.Input(
+                                id='input-domain-start',
+                                type='number',
+                                value=1,
+                            )
+                        ]),
+                        dbc.Row([
+                            'Domain End:',
+                            dcc.Input(
+                                id='input-domain-end',
+                                type='number',
+                                value=20
+                            )
+                        ], style={'margin-top':'20px'}),
+                        dbc.Row([
+                            'Domain Name:', 
+                            dcc.Input(
+                                id='input-domain-name',
+                                type='text',
+                                value=''
+                            )
+                        ], style={'margin-top':'20px'}),
+                        dbc.Button(
                             'Add Domain', 
-                            id='button-add-domain', 
-                            style={'margin-left': '20px'})
-                    ),
-                ], style={
-                    'width': 3,
-                    'padding': '20px'
+                            id='button-add-domain',
+                            color = 'secondary',
+                            outline = False,
+                            style={'margin-top':'30px'}
+                        )
+                    ], style={
+                        'margin-left': '10px',
+                        'margin-right': '20px'}),
+                    dbc.Col([
+                        html.Label('Domain Color:'),
+                        daq.ColorPicker(
+                            id='input-domain-color',
+                            value={'rgb': {'r': 98, 'g': 220, 'b': 209, 'a': 0.45}}
+                        ),
+                    ])
+                ]),
+            ], style={
+                    'background-color': page_background,
+                    'border-radius': '10px', 
+                    'padding':'20px',
+                    'margin-top': '20px'
                 }),
-                dbc.Col([
-                    html.Label('Domain Color:'),
-                    daq.ColorPicker(
-                        id='input-domain-color',
-                        value={'hex': '#000000'}
-                    ),
-                ], style={
-                    'width': 2,
-                    'padding': '20px'
-                })
-            ], style={'padding': '20px'}),
-            html.Hr(),
-            dbc.Row(
-                html.Div(id='domain-table-container')
-            ), 
-            html.Hr(),
-            dbc.Row([
-                dbc.Col([
-                    dbc.Col(
-                        html.H6('Mutation Name:')
-                    ),
-                    dbc.Col(
+            dbc.Container([
+                html.H5('Mutations'),
+                dbc.Row([
+                    dbc.Col([
+                        'Name:',
                         dcc.Input(
                             id='input-mutation-name',
                             type='text',
-                            value=''
+                            value='',
                         )
-                    ),
-                    dbc.Col(
-                        html.H6('Mutation Position:')
-                    ),
-                    dbc.Col(
+                    ], width=4),
+                    dbc.Col(width=1),
+                    dbc.Col([
+                        'Position:',
                         dcc.Input(
                             id='input-mutation-position',
                             type='number',
-                            value=''
+                            value='',
+                        ),
+                    ], width=4),
+                    dbc.Col(width=1),
+                    dbc.Col([
+                        dbc.Button(
+                            'Add', 
+                            id='button-add-mutation',
+                            color = 'secondary',
+                            outline = False,
+                            style={'margin-top':'20px'}
                         )
-                    ),
-                    dbc.Col(
-                        html.Button(
-                            'Add Mutation', 
-                            id='button-add-mutation', 
-                            style={'margin-left': '20px'})
-                    ),
-                ], style={
-                    'width': 3,
-                    'padding': '20px'
-                })
-            ]),
-            html.Hr(),
-            dbc.Row(
-                html.Div(id='mutation-table-container')
-            ), 
+                    ], width=2),
+                ])
+            ], style={
+                    'background-color': page_background,
+                    'border-radius': '10px', 
+                    'padding':'20px',
+                    'margin-top': '20px'
+            }),
             dbc.Row([
-                html.Button(
-                    'Create Logo', 
-                    id='button-create',
-                    style={'padding':'10px'}
-                )
-        ],  style={'padding' : '20px'}),
-            dbc.Row([
-                html.Button(
-                    'Download Logo', 
-                    id='button-download',
-                    style={'padding':'10px'}
-                )
-        ],  style={'padding' : '20px'})
+                dbc.Col([
+                    dbc.Button(
+                        'Reset', 
+                        id='button-reset',
+                        color = 'danger',
+                        outline = True,
+                        style={'width': '100%'}
+                    )
+                ],  width=5),
+                dbc.Col(width=1),
+                dbc.Col([
+                    dbc.Button(
+                        'Create Logo', 
+                        id='button-create',
+                        color = 'dark',
+                        outline = False,
+                        style={'width': '100%'}
+                    )
+                ],  width=5),
+            ], style={
+                'padding': '10px',
+                'margin-left':'10px',
+                'margin-top':'30px',
+                'justify':'10px'}),
         ], width={
             'size': 4,
             'offset': 0},
             style={
-                'height': '90vh',
-                'background': container_background}),
+                'height': '95-120vh',
+                'background': container_background,
+                'border-radius': '10px'}),
         dbc.Col([], style={'width': 1}),
         dbc.Col([
-            dcc.Graph(id='arrow-output'),
+            dbc.Container([
+                dbc.Col(
+                    [
+                        dbc.Tooltip(
+                            '''To download the logo, bring your cursor
+                            to the upper right side of the 
+                            plot area until the tool bar displays, 
+                            then click on the camera icon.''',
+                            target='info-icon',
+                            placement='auto',
+                            trigger='hover',
+                        ),
+                    ], width=11
+                ),
+                dbc.Col(
+                    dbc.Col(
+                        dbc.Button(
+                            '?',
+                            id='info-icon',
+                            color='primary',
+                            outline=True,
+                            className='rounded-circle',
+                            style={'font-size': '24px', 'cursor': 'pointer'},
+                        ),
+                    ),
+                ),
+                dcc.Loading(
+                    dcc.Graph(
+                        id='arrow-output', 
+                        style={'margin-top': '20px'},
+                        config={"toImageButtonOptions": {"format": "svg", "filename": "protein_logo"}}
+                    )
+                )
+            ],  style={
+                    'background-color': white,
+                    'border-radius': '10px', 
+                    'padding':'20px',
+                    'margin-top': '20px'}
+            ),
+            dbc.Row(),
+            dbc.Container(
+                'Domains',
+                id='domain-table-container',
+                style={
+                    'background-color': page_background,
+                    'border-radius': '10px', 
+                    'padding':'20px',
+                    'margin-top': '20px'} 
+            ),
+            dbc.Row(),
+            dbc.Container(
+                'Mutations',
+                id='mutation-table-container',
+                style={
+                    'background-color': page_background,
+                    'border-radius': '10px', 
+                    'padding':'20px',
+                    'margin-top': '20px'} 
+            ),
         ], width={
             'size': 7,
             'offset': 0},
             style={
-                'height': '90vh',
-                'background': container_background})
+                'height': '95-120vh',
+                'background': container_background,
+                'border-radius': '10px', })
     ], style={'padding': '60px'})
 ])
 
@@ -221,13 +281,20 @@ mutations = []
 @callback(
     Output('mutation-table-container', 'children'),
     [Input('button-add-mutation', 'n_clicks')],
+    [Input('button-reset', 'n_clicks')],
     [
         State('input-mutation-name', 'value'),
         State('input-mutation-position', 'value'),
     ],
 )
-def update_domain_table(n_clicks, mutation_name, mutation_position):
-    if n_clicks:
+def update_mutation_table(n_clicks, reset_clicks, mutation_name, mutation_position):
+    if reset_clicks and reset_clicks > 0:
+        # Reset the mutations list to an empty list
+        mutations.clear()
+        # Return an empty div to clear the table
+        return html.Div()
+
+    if n_clicks and n_clicks > 0:
         # Create a new mutation dictionary
         mutation = {
             'Name': mutation_name,
@@ -243,8 +310,22 @@ def update_domain_table(n_clicks, mutation_name, mutation_position):
     table = dash_table.DataTable(
         data=table_data.to_dict('records'),
         columns=[{'name': col, 'id': col} for col in table_data.columns],
-        style_table={'overflowX': 'auto'},
-        style_cell={'textAlign': 'left'},
+        style_table={
+            'overflowX': 'auto',
+            'font-family': 'Helvetica',
+            'border': '1px solid black'
+        },
+        style_cell={
+            'textAlign': 'center',
+            'font-family': 'Helvetica',
+            'border': '1px solid black'
+        },
+        style_header={
+            'textAlign': 'center',
+            'fontWeight': 'bold',
+            'font-family': 'Helvetica',
+            'border': '1px solid black'
+        },
         style_data_conditional=[
             {
                 'if': {'row_index': 'even'},
@@ -257,8 +338,9 @@ def update_domain_table(n_clicks, mutation_name, mutation_position):
         ],
     )
 
-    return table
 
+
+    return table
 
 
 
@@ -267,6 +349,7 @@ def update_domain_table(n_clicks, mutation_name, mutation_position):
 @callback(
     Output('domain-table-container', 'children'),
     [Input('button-add-domain', 'n_clicks')],
+    [Input('button-reset', 'n_clicks')],
     [
         State('input-domain-start', 'value'),
         State('input-domain-end', 'value'),
@@ -274,14 +357,20 @@ def update_domain_table(n_clicks, mutation_name, mutation_position):
         State('input-domain-color', 'value'),
     ],
 )
-def update_domain_table(n_clicks, domain_start, domain_end, domain_name, domain_color):
-    if n_clicks:
+def update_domain_table(n_clicks, reset_clicks, domain_start, domain_end, domain_name, domain_color):
+    if reset_clicks and reset_clicks > 0:
+        # Reset the domains list to an empty list
+        domains.clear()
+        # Return an empty div to clear the table
+        return html.Div()
+
+    if n_clicks and n_clicks > 0:
         # Create a new domain dictionary
         domain = {
             'Name': domain_name,
             'Start': domain_start,
             'End': domain_end,
-            'Color': domain_color['hex'],
+            'Color': rgba_to_hex(domain_color['rgb']),
         }
         # Append the domain to the list
         domains.append(domain)
@@ -293,8 +382,22 @@ def update_domain_table(n_clicks, domain_start, domain_end, domain_name, domain_
     table = dash_table.DataTable(
         data=table_data.to_dict('records'),
         columns=[{'name': col, 'id': col} for col in table_data.columns],
-        style_table={'overflowX': 'auto'},
-        style_cell={'textAlign': 'left'},
+        style_table={
+            'overflowX': 'auto',
+            'font-family': 'Helvetica',
+            'border': '1px solid black'
+        },
+        style_cell={
+            'textAlign': 'center',
+            'font-family': 'Helvetica',
+            'border': '1px solid black'
+        },
+        style_header={
+            'textAlign': 'center',
+            'fontWeight': 'bold',
+            'font-family': 'Helvetica',
+            'border': '1px solid black'
+        },
         style_data_conditional=[
             {
                 'if': {'row_index': 'even'},
@@ -307,11 +410,9 @@ def update_domain_table(n_clicks, domain_start, domain_end, domain_name, domain_
         ],
     )
 
+
+
     return table
-
-
-
-
 
 
 
@@ -319,25 +420,34 @@ def update_domain_table(n_clicks, domain_start, domain_end, domain_name, domain_
     Output('arrow-output', 'figure'),
     [
         Input('button-create', 'n_clicks'), 
-        Input('domain-table-container', 'children')
+        Input('domain-table-container', 'children'), 
+        Input('mutation-table-container', 'children'),
+        Input('button-reset', 'n_clicks')
     ],
     [
         State('input-length', 'value'), 
         State('input-color', 'value')
      ]
 )
-def generate_arrow(n_clicks, domains, length, logo_color):
-    if n_clicks is None:
-        return {}
+def generate_arrow(n_clicks, domains, mutations, reset_clicks, length, logo_color):
+    if reset_clicks and reset_clicks > 0:
+        return placeholder_graph()
 
-    data = domains['props']['data']
-    domains_list = pd.DataFrame(data)
+    if n_clicks is None:
+        return placeholder_graph()
+
+    data_domains = domains['props']['data']
+    domains_list = pd.DataFrame(data_domains)
+
+    data_mutations = mutations['props']['data']
+    mutations_list = pd.DataFrame(data_mutations)
 
     # Create the arrow using Matplotlib
-    logo = create_fig(length, logo_color, domains_list)
+    logo = create_fig(length, logo_color, domains_list, mutations_list)
 
     # Return the figure as a dictionary for Dash graph
-    return logo 
+    return logo
+
 
 
 
@@ -356,3 +466,7 @@ def get_svg_data():
                '<path d="M0,0 L90,0 L100,50 L90,100 L0,100 Z" fill="black" stroke="black" stroke-width="1" />' \
                '</svg>'
     return svg_data
+
+
+
+    

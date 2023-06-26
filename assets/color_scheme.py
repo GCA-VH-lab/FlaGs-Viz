@@ -7,6 +7,7 @@ page_background = '#f6f6f6'
 container_background = '#ececec'
 transparent_background = 'rgba(0,0,0,0)'
 navigation_bar = '#3e4c59'
+white = '#ffffff'
 
 
 # --------------------------- LOGOS COLORS -----------------------------
